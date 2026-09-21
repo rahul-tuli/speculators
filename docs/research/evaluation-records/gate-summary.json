@@ -1,0 +1,898 @@
+[
+  {
+    "arm": "fp8-real",
+    "run_path": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/fp8-real/repeat-0/27d57b06d7e0362b71ca",
+    "context": 20749,
+    "finite_modules": 338,
+    "audit": {
+      "module_mapping": {
+        "model.fc": [
+          "fc"
+        ],
+        "model.layers.0.mlp.down_proj": [
+          "layers.0.mlp.down_proj"
+        ],
+        "model.layers.0.mlp.gate_up_proj": [
+          "layers.0.mlp.gate_proj",
+          "layers.0.mlp.up_proj"
+        ],
+        "model.layers.0.self_attn.qkv_proj": [
+          "layers.0.self_attn.k_proj",
+          "layers.0.self_attn.q_proj",
+          "layers.0.self_attn.v_proj"
+        ],
+        "model.layers.0.self_attn.o_proj": [
+          "layers.0.self_attn.o_proj"
+        ],
+        "model.layers.1.mlp.down_proj": [
+          "layers.1.mlp.down_proj"
+        ],
+        "model.layers.1.mlp.gate_up_proj": [
+          "layers.1.mlp.gate_proj",
+          "layers.1.mlp.up_proj"
+        ],
+        "model.layers.1.self_attn.qkv_proj": [
+          "layers.1.self_attn.k_proj",
+          "layers.1.self_attn.q_proj",
+          "layers.1.self_attn.v_proj"
+        ],
+        "model.layers.1.self_attn.o_proj": [
+          "layers.1.self_attn.o_proj"
+        ],
+        "model.layers.2.mlp.down_proj": [
+          "layers.2.mlp.down_proj"
+        ],
+        "model.layers.2.mlp.gate_up_proj": [
+          "layers.2.mlp.gate_proj",
+          "layers.2.mlp.up_proj"
+        ],
+        "model.layers.2.self_attn.qkv_proj": [
+          "layers.2.self_attn.k_proj",
+          "layers.2.self_attn.q_proj",
+          "layers.2.self_attn.v_proj"
+        ],
+        "model.layers.2.self_attn.o_proj": [
+          "layers.2.self_attn.o_proj"
+        ],
+        "model.layers.3.mlp.down_proj": [
+          "layers.3.mlp.down_proj"
+        ],
+        "model.layers.3.mlp.gate_up_proj": [
+          "layers.3.mlp.gate_proj",
+          "layers.3.mlp.up_proj"
+        ],
+        "model.layers.3.self_attn.qkv_proj": [
+          "layers.3.self_attn.k_proj",
+          "layers.3.self_attn.q_proj",
+          "layers.3.self_attn.v_proj"
+        ],
+        "model.layers.3.self_attn.o_proj": [
+          "layers.3.self_attn.o_proj"
+        ],
+        "model.layers.4.mlp.down_proj": [
+          "layers.4.mlp.down_proj"
+        ],
+        "model.layers.4.mlp.gate_up_proj": [
+          "layers.4.mlp.gate_proj",
+          "layers.4.mlp.up_proj"
+        ],
+        "model.layers.4.self_attn.qkv_proj": [
+          "layers.4.self_attn.k_proj",
+          "layers.4.self_attn.q_proj",
+          "layers.4.self_attn.v_proj"
+        ],
+        "model.layers.4.self_attn.o_proj": [
+          "layers.4.self_attn.o_proj"
+        ]
+      },
+      "effective_scales": {},
+      "export_quantized_modules": 36,
+      "runtime_quantized_modules": 21
+    },
+    "points": [
+      {
+        "workload": "pilot",
+        "prompt_tokens": 52,
+        "output_tokens": 2607,
+        "request_latency_s": 14.55147123336792,
+        "warmup_requests": 2,
+        "warmup_latencies_s": [
+          14.786425590515137,
+          15.059086561203003
+        ],
+        "acceptance": {
+          "acceptance_length": 3.1247002398081536,
+          "accepted_by_position": [
+            626.0,
+            407.0,
+            265.0,
+            175.0,
+            132.0,
+            92.0,
+            75.0
+          ],
+          "accepted_token_fraction": 0.30352860568687906,
+          "accepted_tokens": 1772.0,
+          "draft_events": 834.0,
+          "per_position_acceptance": [
+            0.750599520383693,
+            0.4880095923261391,
+            0.31774580335731417,
+            0.20983213429256595,
+            0.15827338129496402,
+            0.11031175059952038,
+            0.08992805755395683
+          ],
+          "proposed_tokens": 5838.0
+        },
+        "source": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/fp8-real/repeat-0/27d57b06d7e0362b71ca/concurrency-1/pilot/attempt-1789997639131145378"
+      },
+      {
+        "workload": "pilot-long",
+        "prompt_tokens": 16653,
+        "output_tokens": 4096,
+        "request_latency_s": 17.489334106445312,
+        "warmup_requests": 2,
+        "warmup_latencies_s": [
+          17.50541114807129,
+          17.39692783355713
+        ],
+        "acceptance": {
+          "acceptance_length": 4.295907660020987,
+          "accepted_by_position": [
+            739.0,
+            582.0,
+            483.0,
+            450.0,
+            317.0,
+            296.0,
+            274.0
+          ],
+          "accepted_token_fraction": 0.47162162162162163,
+          "accepted_tokens": 3141.0,
+          "draft_events": 953.0,
+          "per_position_acceptance": [
+            0.7754459601259182,
+            0.6107030430220357,
+            0.5068205666316894,
+            0.472193074501574,
+            0.33263378803777544,
+            0.310598111227702,
+            0.28751311647429173
+          ],
+          "proposed_tokens": 6660.0
+        },
+        "source": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/fp8-real/repeat-0/27d57b06d7e0362b71ca/concurrency-1/pilot-long/attempt-1789997704881534226"
+      }
+    ],
+    "kernels": [
+      "CutlassFP8ScaledMMLinearKernel"
+    ]
+  },
+  {
+    "arm": "fp8-gaussian",
+    "run_path": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/fp8-gaussian/repeat-0/450d8e375d9d0f7188a3",
+    "context": 20749,
+    "finite_modules": 338,
+    "audit": {
+      "module_mapping": {
+        "model.fc": [
+          "fc"
+        ],
+        "model.layers.0.mlp.down_proj": [
+          "layers.0.mlp.down_proj"
+        ],
+        "model.layers.0.mlp.gate_up_proj": [
+          "layers.0.mlp.gate_proj",
+          "layers.0.mlp.up_proj"
+        ],
+        "model.layers.0.self_attn.qkv_proj": [
+          "layers.0.self_attn.k_proj",
+          "layers.0.self_attn.q_proj",
+          "layers.0.self_attn.v_proj"
+        ],
+        "model.layers.0.self_attn.o_proj": [
+          "layers.0.self_attn.o_proj"
+        ],
+        "model.layers.1.mlp.down_proj": [
+          "layers.1.mlp.down_proj"
+        ],
+        "model.layers.1.mlp.gate_up_proj": [
+          "layers.1.mlp.gate_proj",
+          "layers.1.mlp.up_proj"
+        ],
+        "model.layers.1.self_attn.qkv_proj": [
+          "layers.1.self_attn.k_proj",
+          "layers.1.self_attn.q_proj",
+          "layers.1.self_attn.v_proj"
+        ],
+        "model.layers.1.self_attn.o_proj": [
+          "layers.1.self_attn.o_proj"
+        ],
+        "model.layers.2.mlp.down_proj": [
+          "layers.2.mlp.down_proj"
+        ],
+        "model.layers.2.mlp.gate_up_proj": [
+          "layers.2.mlp.gate_proj",
+          "layers.2.mlp.up_proj"
+        ],
+        "model.layers.2.self_attn.qkv_proj": [
+          "layers.2.self_attn.k_proj",
+          "layers.2.self_attn.q_proj",
+          "layers.2.self_attn.v_proj"
+        ],
+        "model.layers.2.self_attn.o_proj": [
+          "layers.2.self_attn.o_proj"
+        ],
+        "model.layers.3.mlp.down_proj": [
+          "layers.3.mlp.down_proj"
+        ],
+        "model.layers.3.mlp.gate_up_proj": [
+          "layers.3.mlp.gate_proj",
+          "layers.3.mlp.up_proj"
+        ],
+        "model.layers.3.self_attn.qkv_proj": [
+          "layers.3.self_attn.k_proj",
+          "layers.3.self_attn.q_proj",
+          "layers.3.self_attn.v_proj"
+        ],
+        "model.layers.3.self_attn.o_proj": [
+          "layers.3.self_attn.o_proj"
+        ],
+        "model.layers.4.mlp.down_proj": [
+          "layers.4.mlp.down_proj"
+        ],
+        "model.layers.4.mlp.gate_up_proj": [
+          "layers.4.mlp.gate_proj",
+          "layers.4.mlp.up_proj"
+        ],
+        "model.layers.4.self_attn.qkv_proj": [
+          "layers.4.self_attn.k_proj",
+          "layers.4.self_attn.q_proj",
+          "layers.4.self_attn.v_proj"
+        ],
+        "model.layers.4.self_attn.o_proj": [
+          "layers.4.self_attn.o_proj"
+        ]
+      },
+      "effective_scales": {},
+      "export_quantized_modules": 36,
+      "runtime_quantized_modules": 21
+    },
+    "points": [
+      {
+        "workload": "pilot",
+        "prompt_tokens": 52,
+        "output_tokens": 3161,
+        "request_latency_s": 26.339191198349,
+        "warmup_requests": 2,
+        "warmup_latencies_s": [
+          25.884066820144653,
+          26.15209412574768
+        ],
+        "acceptance": {
+          "acceptance_length": 2.1890581717451525,
+          "accepted_by_position": [
+            784.0,
+            402.0,
+            226.0,
+            132.0,
+            79.0,
+            57.0,
+            37.0
+          ],
+          "accepted_token_fraction": 0.16986545310645035,
+          "accepted_tokens": 1717.0,
+          "draft_events": 1444.0,
+          "per_position_acceptance": [
+            0.5429362880886427,
+            0.278393351800554,
+            0.15650969529085873,
+            0.09141274238227147,
+            0.054709141274238225,
+            0.039473684210526314,
+            0.025623268698060944
+          ],
+          "proposed_tokens": 10108.0
+        },
+        "source": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/fp8-gaussian/repeat-0/450d8e375d9d0f7188a3/concurrency-1/pilot/attempt-1789997852453824774"
+      },
+      {
+        "workload": "pilot-long",
+        "prompt_tokens": 16653,
+        "output_tokens": 4096,
+        "request_latency_s": 29.815973043441772,
+        "warmup_requests": 2,
+        "warmup_latencies_s": [
+          29.488285541534424,
+          29.935648441314697
+        ],
+        "acceptance": {
+          "acceptance_length": 2.5780856423173804,
+          "accepted_by_position": [
+            983.0,
+            626.0,
+            402.0,
+            269.0,
+            144.0,
+            59.0,
+            23.0
+          ],
+          "accepted_token_fraction": 0.22578610685647355,
+          "accepted_tokens": 2506.0,
+          "draft_events": 1588.0,
+          "per_position_acceptance": [
+            0.6190176322418136,
+            0.39420654911838793,
+            0.2531486146095718,
+            0.16939546599496222,
+            0.0906801007556675,
+            0.0371536523929471,
+            0.014483627204030227
+          ],
+          "proposed_tokens": 11099.0
+        },
+        "source": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/fp8-gaussian/repeat-0/450d8e375d9d0f7188a3/concurrency-1/pilot-long/attempt-1789997952609542836"
+      }
+    ],
+    "kernels": [
+      "CutlassFP8ScaledMMLinearKernel"
+    ]
+  },
+  {
+    "arm": "bf16-drafter",
+    "run_path": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/bf16-drafter/repeat-0/0cf3b7e10b2044c157da",
+    "context": 20749,
+    "finite_modules": 333,
+    "audit": null,
+    "points": [
+      {
+        "workload": "pilot",
+        "prompt_tokens": 52,
+        "output_tokens": 3118,
+        "request_latency_s": 15.802812099456787,
+        "warmup_requests": 2,
+        "warmup_latencies_s": [
+          15.927237510681152,
+          15.79568362236023
+        ],
+        "acceptance": {
+          "acceptance_length": 3.2434963579604577,
+          "accepted_by_position": [
+            741.0,
+            500.0,
+            324.0,
+            215.0,
+            162.0,
+            121.0,
+            93.0
+          ],
+          "accepted_token_fraction": 0.32049947970863685,
+          "accepted_tokens": 2156.0,
+          "draft_events": 961.0,
+          "per_position_acceptance": [
+            0.7710718002081165,
+            0.5202913631633714,
+            0.33714880332986474,
+            0.22372528616024975,
+            0.16857440166493237,
+            0.1259105098855359,
+            0.0967741935483871
+          ],
+          "proposed_tokens": 6727.0
+        },
+        "source": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/bf16-drafter/repeat-0/0cf3b7e10b2044c157da/concurrency-1/pilot/attempt-1789998139484487534"
+      },
+      {
+        "workload": "pilot-long",
+        "prompt_tokens": 16653,
+        "output_tokens": 4096,
+        "request_latency_s": 16.60414457321167,
+        "warmup_requests": 2,
+        "warmup_latencies_s": [
+          16.481691122055054,
+          16.496268033981323
+        ],
+        "acceptance": {
+          "acceptance_length": 4.318565400843882,
+          "accepted_by_position": [
+            733.0,
+            586.0,
+            485.0,
+            444.0,
+            327.0,
+            300.0,
+            271.0
+          ],
+          "accepted_token_fraction": 0.4748679245283019,
+          "accepted_tokens": 3146.0,
+          "draft_events": 948.0,
+          "per_position_acceptance": [
+            0.7732067510548524,
+            0.6181434599156118,
+            0.5116033755274262,
+            0.46835443037974683,
+            0.3449367088607595,
+            0.31645569620253167,
+            0.2858649789029536
+          ],
+          "proposed_tokens": 6625.0
+        },
+        "source": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/bf16-drafter/repeat-0/0cf3b7e10b2044c157da/concurrency-1/pilot-long/attempt-1789998208580245951"
+      }
+    ],
+    "kernels": []
+  },
+  {
+    "arm": "target-only",
+    "run_path": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/target-only/repeat-0/d067023079573aaead26",
+    "context": 20749,
+    "finite_modules": 290,
+    "audit": null,
+    "points": [
+      {
+        "workload": "pilot",
+        "prompt_tokens": 52,
+        "output_tokens": 2286,
+        "request_latency_s": 30.633336782455444,
+        "warmup_requests": 2,
+        "warmup_latencies_s": [
+          30.653902053833008,
+          30.18509602546692
+        ],
+        "acceptance": null,
+        "source": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/target-only/repeat-0/d067023079573aaead26/concurrency-1/pilot/attempt-1789998348644466956"
+      },
+      {
+        "workload": "pilot-long",
+        "prompt_tokens": 16653,
+        "output_tokens": 4096,
+        "request_latency_s": 56.111871004104614,
+        "warmup_requests": 2,
+        "warmup_latencies_s": [
+          54.669543743133545,
+          55.214213371276855
+        ],
+        "acceptance": null,
+        "source": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/target-only/repeat-0/d067023079573aaead26/concurrency-1/pilot-long/attempt-1789998461768158757"
+      }
+    ],
+    "kernels": []
+  },
+  {
+    "arm": "nvfp4-real",
+    "run_path": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/nvfp4-real/repeat-0/20cb3b07011ddcd1477b",
+    "context": 20749,
+    "finite_modules": 338,
+    "audit": {
+      "module_mapping": {
+        "model.fc": [
+          "fc"
+        ],
+        "model.layers.0.mlp.down_proj": [
+          "layers.0.mlp.down_proj"
+        ],
+        "model.layers.0.mlp.gate_up_proj": [
+          "layers.0.mlp.gate_proj",
+          "layers.0.mlp.up_proj"
+        ],
+        "model.layers.0.self_attn.qkv_proj": [
+          "layers.0.self_attn.k_proj",
+          "layers.0.self_attn.q_proj",
+          "layers.0.self_attn.v_proj"
+        ],
+        "model.layers.0.self_attn.o_proj": [
+          "layers.0.self_attn.o_proj"
+        ],
+        "model.layers.1.mlp.down_proj": [
+          "layers.1.mlp.down_proj"
+        ],
+        "model.layers.1.mlp.gate_up_proj": [
+          "layers.1.mlp.gate_proj",
+          "layers.1.mlp.up_proj"
+        ],
+        "model.layers.1.self_attn.qkv_proj": [
+          "layers.1.self_attn.k_proj",
+          "layers.1.self_attn.q_proj",
+          "layers.1.self_attn.v_proj"
+        ],
+        "model.layers.1.self_attn.o_proj": [
+          "layers.1.self_attn.o_proj"
+        ],
+        "model.layers.2.mlp.down_proj": [
+          "layers.2.mlp.down_proj"
+        ],
+        "model.layers.2.mlp.gate_up_proj": [
+          "layers.2.mlp.gate_proj",
+          "layers.2.mlp.up_proj"
+        ],
+        "model.layers.2.self_attn.qkv_proj": [
+          "layers.2.self_attn.k_proj",
+          "layers.2.self_attn.q_proj",
+          "layers.2.self_attn.v_proj"
+        ],
+        "model.layers.2.self_attn.o_proj": [
+          "layers.2.self_attn.o_proj"
+        ],
+        "model.layers.3.mlp.down_proj": [
+          "layers.3.mlp.down_proj"
+        ],
+        "model.layers.3.mlp.gate_up_proj": [
+          "layers.3.mlp.gate_proj",
+          "layers.3.mlp.up_proj"
+        ],
+        "model.layers.3.self_attn.qkv_proj": [
+          "layers.3.self_attn.k_proj",
+          "layers.3.self_attn.q_proj",
+          "layers.3.self_attn.v_proj"
+        ],
+        "model.layers.3.self_attn.o_proj": [
+          "layers.3.self_attn.o_proj"
+        ],
+        "model.layers.4.mlp.down_proj": [
+          "layers.4.mlp.down_proj"
+        ],
+        "model.layers.4.mlp.gate_up_proj": [
+          "layers.4.mlp.gate_proj",
+          "layers.4.mlp.up_proj"
+        ],
+        "model.layers.4.self_attn.qkv_proj": [
+          "layers.4.self_attn.k_proj",
+          "layers.4.self_attn.q_proj",
+          "layers.4.self_attn.v_proj"
+        ],
+        "model.layers.4.self_attn.o_proj": [
+          "layers.4.self_attn.o_proj"
+        ]
+      },
+      "effective_scales": {
+        "model.fc": {
+          "input_inverse": 0.119140625,
+          "weight": 0.0031446540880503146
+        },
+        "model.layers.0.mlp.down_proj": {
+          "input_inverse": 45.0,
+          "weight": 0.001288659793814433
+        },
+        "model.layers.0.mlp.gate_up_proj": {
+          "input_inverse": 3488.0,
+          "weight": 0.00048449612403100775
+        },
+        "model.layers.0.self_attn.qkv_proj": {
+          "input_inverse": 161.0,
+          "weight": 0.0002670940170940171
+        },
+        "model.layers.0.self_attn.o_proj": {
+          "input_inverse": 276.0,
+          "weight": 0.000249003984063745
+        },
+        "model.layers.1.mlp.down_proj": {
+          "input_inverse": 41.25,
+          "weight": 0.0022522522522522522
+        },
+        "model.layers.1.mlp.gate_up_proj": {
+          "input_inverse": 1552.0,
+          "weight": 0.00024224806201550387
+        },
+        "model.layers.1.self_attn.qkv_proj": {
+          "input_inverse": 1004.0,
+          "weight": 0.0002281021897810219
+        },
+        "model.layers.1.self_attn.o_proj": {
+          "input_inverse": 276.0,
+          "weight": 0.0003255208333333333
+        },
+        "model.layers.2.mlp.down_proj": {
+          "input_inverse": 77.0,
+          "weight": 0.0010204081632653062
+        },
+        "model.layers.2.mlp.gate_up_proj": {
+          "input_inverse": 960.0,
+          "weight": 0.00035714285714285714
+        },
+        "model.layers.2.self_attn.qkv_proj": {
+          "input_inverse": 394.0,
+          "weight": 0.00038819875776397513
+        },
+        "model.layers.2.self_attn.o_proj": {
+          "input_inverse": 240.0,
+          "weight": 0.00027901785714285713
+        },
+        "model.layers.3.mlp.down_proj": {
+          "input_inverse": 26.125,
+          "weight": 0.0012315270935960591
+        },
+        "model.layers.3.mlp.gate_up_proj": {
+          "input_inverse": 410.0,
+          "weight": 0.00041118421052631577
+        },
+        "model.layers.3.self_attn.qkv_proj": {
+          "input_inverse": 276.0,
+          "weight": 0.0004166666666666667
+        },
+        "model.layers.3.self_attn.o_proj": {
+          "input_inverse": 201.0,
+          "weight": 0.00025614754098360657
+        },
+        "model.layers.4.mlp.down_proj": {
+          "input_inverse": 23.625,
+          "weight": 0.000980392156862745
+        },
+        "model.layers.4.mlp.gate_up_proj": {
+          "input_inverse": 300.0,
+          "weight": 0.00034340659340659343
+        },
+        "model.layers.4.self_attn.qkv_proj": {
+          "input_inverse": 148.0,
+          "weight": 0.0006443298969072165
+        },
+        "model.layers.4.self_attn.o_proj": {
+          "input_inverse": 112.0,
+          "weight": 0.00034722222222222224
+        }
+      },
+      "export_quantized_modules": 36,
+      "runtime_quantized_modules": 21
+    },
+    "points": [
+      {
+        "workload": "pilot-long",
+        "prompt_tokens": 16653,
+        "output_tokens": 4096,
+        "request_latency_s": 21.15053677558899,
+        "warmup_requests": 2,
+        "warmup_latencies_s": [
+          22.61497950553894,
+          21.291027545928955
+        ],
+        "acceptance": {
+          "acceptance_length": 3.9873417721518987,
+          "accepted_by_position": [
+            794.0,
+            617.0,
+            509.0,
+            431.0,
+            347.0,
+            227.0,
+            143.0
+          ],
+          "accepted_token_fraction": 0.4267631103074141,
+          "accepted_tokens": 3068.0,
+          "draft_events": 1027.0,
+          "per_position_acceptance": [
+            0.7731256085686465,
+            0.6007789678675755,
+            0.495618305744888,
+            0.4196689386562804,
+            0.33787731256085685,
+            0.22103213242453748,
+            0.13924050632911392
+          ],
+          "proposed_tokens": 7189.0
+        },
+        "source": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/nvfp4-real/repeat-0/20cb3b07011ddcd1477b/concurrency-1/pilot-long/attempt-1789998724585398172"
+      }
+    ],
+    "kernels": [
+      "EmulationNvFp4LinearKernel"
+    ]
+  },
+  {
+    "arm": "nvfp4-gaussian",
+    "run_path": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/nvfp4-gaussian/repeat-0/3e41f93beac36a27934d",
+    "context": 20749,
+    "finite_modules": 338,
+    "audit": {
+      "module_mapping": {
+        "model.fc": [
+          "fc"
+        ],
+        "model.layers.0.mlp.down_proj": [
+          "layers.0.mlp.down_proj"
+        ],
+        "model.layers.0.mlp.gate_up_proj": [
+          "layers.0.mlp.gate_proj",
+          "layers.0.mlp.up_proj"
+        ],
+        "model.layers.0.self_attn.qkv_proj": [
+          "layers.0.self_attn.k_proj",
+          "layers.0.self_attn.q_proj",
+          "layers.0.self_attn.v_proj"
+        ],
+        "model.layers.0.self_attn.o_proj": [
+          "layers.0.self_attn.o_proj"
+        ],
+        "model.layers.1.mlp.down_proj": [
+          "layers.1.mlp.down_proj"
+        ],
+        "model.layers.1.mlp.gate_up_proj": [
+          "layers.1.mlp.gate_proj",
+          "layers.1.mlp.up_proj"
+        ],
+        "model.layers.1.self_attn.qkv_proj": [
+          "layers.1.self_attn.k_proj",
+          "layers.1.self_attn.q_proj",
+          "layers.1.self_attn.v_proj"
+        ],
+        "model.layers.1.self_attn.o_proj": [
+          "layers.1.self_attn.o_proj"
+        ],
+        "model.layers.2.mlp.down_proj": [
+          "layers.2.mlp.down_proj"
+        ],
+        "model.layers.2.mlp.gate_up_proj": [
+          "layers.2.mlp.gate_proj",
+          "layers.2.mlp.up_proj"
+        ],
+        "model.layers.2.self_attn.qkv_proj": [
+          "layers.2.self_attn.k_proj",
+          "layers.2.self_attn.q_proj",
+          "layers.2.self_attn.v_proj"
+        ],
+        "model.layers.2.self_attn.o_proj": [
+          "layers.2.self_attn.o_proj"
+        ],
+        "model.layers.3.mlp.down_proj": [
+          "layers.3.mlp.down_proj"
+        ],
+        "model.layers.3.mlp.gate_up_proj": [
+          "layers.3.mlp.gate_proj",
+          "layers.3.mlp.up_proj"
+        ],
+        "model.layers.3.self_attn.qkv_proj": [
+          "layers.3.self_attn.k_proj",
+          "layers.3.self_attn.q_proj",
+          "layers.3.self_attn.v_proj"
+        ],
+        "model.layers.3.self_attn.o_proj": [
+          "layers.3.self_attn.o_proj"
+        ],
+        "model.layers.4.mlp.down_proj": [
+          "layers.4.mlp.down_proj"
+        ],
+        "model.layers.4.mlp.gate_up_proj": [
+          "layers.4.mlp.gate_proj",
+          "layers.4.mlp.up_proj"
+        ],
+        "model.layers.4.self_attn.qkv_proj": [
+          "layers.4.self_attn.k_proj",
+          "layers.4.self_attn.q_proj",
+          "layers.4.self_attn.v_proj"
+        ],
+        "model.layers.4.self_attn.o_proj": [
+          "layers.4.self_attn.o_proj"
+        ]
+      },
+      "effective_scales": {
+        "model.fc": {
+          "input_inverse": 512.0,
+          "weight": 0.0031446540880503146
+        },
+        "model.layers.0.mlp.down_proj": {
+          "input_inverse": 47.0,
+          "weight": 0.001288659793814433
+        },
+        "model.layers.0.mlp.gate_up_proj": {
+          "input_inverse": 2976.0,
+          "weight": 0.00048449612403100775
+        },
+        "model.layers.0.self_attn.qkv_proj": {
+          "input_inverse": 350.0,
+          "weight": 0.0002670940170940171
+        },
+        "model.layers.0.self_attn.o_proj": {
+          "input_inverse": 148.0,
+          "weight": 0.000249003984063745
+        },
+        "model.layers.1.mlp.down_proj": {
+          "input_inverse": 23.0,
+          "weight": 0.0022522522522522522
+        },
+        "model.layers.1.mlp.gate_up_proj": {
+          "input_inverse": 1072.0,
+          "weight": 0.00024224806201550387
+        },
+        "model.layers.1.self_attn.qkv_proj": {
+          "input_inverse": 572.0,
+          "weight": 0.0002281021897810219
+        },
+        "model.layers.1.self_attn.o_proj": {
+          "input_inverse": 185.0,
+          "weight": 0.0003255208333333333
+        },
+        "model.layers.2.mlp.down_proj": {
+          "input_inverse": 28.0,
+          "weight": 0.0010204081632653062
+        },
+        "model.layers.2.mlp.gate_up_proj": {
+          "input_inverse": 608.0,
+          "weight": 0.00035714285714285714
+        },
+        "model.layers.2.self_attn.qkv_proj": {
+          "input_inverse": 219.0,
+          "weight": 0.00038819875776397513
+        },
+        "model.layers.2.self_attn.o_proj": {
+          "input_inverse": 159.0,
+          "weight": 0.00027901785714285713
+        },
+        "model.layers.3.mlp.down_proj": {
+          "input_inverse": 12.3125,
+          "weight": 0.0012315270935960591
+        },
+        "model.layers.3.mlp.gate_up_proj": {
+          "input_inverse": 370.0,
+          "weight": 0.00041118421052631577
+        },
+        "model.layers.3.self_attn.qkv_proj": {
+          "input_inverse": 181.0,
+          "weight": 0.0004166666666666667
+        },
+        "model.layers.3.self_attn.o_proj": {
+          "input_inverse": 150.0,
+          "weight": 0.00025614754098360657
+        },
+        "model.layers.4.mlp.down_proj": {
+          "input_inverse": 6.96875,
+          "weight": 0.000980392156862745
+        },
+        "model.layers.4.mlp.gate_up_proj": {
+          "input_inverse": 226.0,
+          "weight": 0.00034340659340659343
+        },
+        "model.layers.4.self_attn.qkv_proj": {
+          "input_inverse": 98.0,
+          "weight": 0.0006443298969072165
+        },
+        "model.layers.4.self_attn.o_proj": {
+          "input_inverse": 65.5,
+          "weight": 0.00034722222222222224
+        }
+      },
+      "export_quantized_modules": 36,
+      "runtime_quantized_modules": 21
+    },
+    "points": [
+      {
+        "workload": "pilot-long",
+        "prompt_tokens": 16653,
+        "output_tokens": 4096,
+        "request_latency_s": 34.48107647895813,
+        "warmup_requests": 2,
+        "warmup_latencies_s": [
+          34.86117744445801,
+          34.67647194862366
+        ],
+        "acceptance": {
+          "acceptance_length": 2.2858738135120045,
+          "accepted_by_position": [
+            1097.0,
+            614.0,
+            319.0,
+            163.0,
+            72.0,
+            26.0,
+            12.0
+          ],
+          "accepted_token_fraction": 0.18398977390748583,
+          "accepted_tokens": 2303.0,
+          "draft_events": 1791.0,
+          "per_position_acceptance": [
+            0.6125069793411502,
+            0.3428252372975991,
+            0.17811278615298715,
+            0.0910106085985483,
+            0.04020100502512563,
+            0.014517029592406477,
+            0.006700167504187605
+          ],
+          "proposed_tokens": 12517.0
+        },
+        "source": "/data/fast/drafter-quant/validation/evaluation-records/full-context-arms/pilot/nvfp4-gaussian/repeat-0/3e41f93beac36a27934d/concurrency-1/pilot-long/attempt-1789998886948298943"
+      }
+    ],
+    "kernels": [
+      "EmulationNvFp4LinearKernel"
+    ]
+  }
+]

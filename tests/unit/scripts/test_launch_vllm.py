@@ -1,7 +1,9 @@
 import os
+from argparse import Namespace
 
 from scripts.launch_vllm import (
     DEFAULT_RENDERER_NUM_WORKERS,
+    _build_eval_cmd,
     _enable_scale_out_endpoints,
     _preprocessing_workers,
     _set_render_thread_defaults,
@@ -87,3 +89,12 @@ def test_sizing_uses_one_combined_budget():
     assert preprocessing_workers == 30
     assert api_servers == 7
     assert preprocessing_workers * 3 + api_servers * 4 <= int(160 * 0.75)
+
+
+def test_target_only_eval_omits_drafter_flags():
+    args = Namespace(
+        model="target", spec_model=None, spec_tokens=None, spec_method=None
+    )
+    cmd = _build_eval_cmd(args, ["--dtype", "bfloat16"])
+    assert cmd[-3:] == ["target", "--dtype", "bfloat16"]
+    assert "--spec-model" not in cmd

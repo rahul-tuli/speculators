@@ -263,14 +263,11 @@ def _run_subset(
         logger.warning("[%s] No speculative decoding metrics found", subset)
 
     if is_sweep:
-        rows = parse_sweep_results(
-            run_output,
-            spec if has_spec else None,
-        )
+        # Counters bracket the entire sweep, not individual load points.
+        rows = parse_sweep_results(run_output)
         if rows:
             if perf_csv is None:
-                acc_cols = acceptance_csv_columns(spec) if has_spec else []
-                cols = BASE_CSV_COLUMNS + acc_cols
+                cols = BASE_CSV_COLUMNS
                 perf_csv = CsvWriter(
                     output_dir / "perf_results.csv",
                     cols,
@@ -357,7 +354,7 @@ def run_benchmark(args: argparse.Namespace) -> None:
         if mt is not None:
             all_max_tokens[label] = mt
 
-    if acceptance_csv is None:
+    if acceptance_csv is None and not args.target_only:
         logger.error("No acceptance metrics collected from any subset")
         sys.exit(1)
 
@@ -389,12 +386,19 @@ def main() -> None:
     )
     parser.add_argument(
         "mode",
-        choices=["throughput", "sweep"],
+        choices=["throughput", "sweep", "point"],
         help=(
             "throughput: max-rate run for acceptance rates; "
             "sweep: full benchmarking pipeline"
         ),
     )
+    parser.add_argument("--target-only", action="store_true")
+    parser.add_argument(
+        "--identity", type=Path, help="Immutable point run identity JSON"
+    )
+    parser.add_argument("--warmup-requests", type=int, default=2)
+    parser.add_argument("--max-tokens", type=int, default=4096)
+    parser.add_argument("--eval-seed", type=int, default=0)
     parser.add_argument(
         "--target",
         required=True,
@@ -470,7 +474,12 @@ def main() -> None:
         else:
             args.output_dir = f"perf_results_{timestamp}"
 
-    run_benchmark(args)
+    if args.mode == "point":
+        from point import run_point  # noqa: PLC0415
+
+        run_point(args)
+    else:
+        run_benchmark(args)
 
 
 if __name__ == "__main__":

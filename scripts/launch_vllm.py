@@ -244,8 +244,8 @@ def parse_args():
     eval_parser.add_argument(
         "--spec-model",
         type=str,
-        required=True,
-        help="Drafter model name or path",
+        default=None,
+        help="Drafter model name or path (omit for target-only evaluation)",
     )
     eval_parser.add_argument(
         "--spec-tokens",
@@ -503,9 +503,11 @@ def _build_eval_cmd(args, vllm_args):
         "vllm.entrypoints.cli.main",
         "serve",
         args.model,
-        "--spec-model",
-        args.spec_model,
     ]
+    if args.spec_model is not None:
+        cmd.extend(["--spec-model", args.spec_model])
+    elif args.spec_tokens is not None or args.spec_method is not None:
+        raise ValueError("--spec-tokens/--spec-method require --spec-model")
     if args.spec_tokens is not None:
         cmd.extend(["--spec-tokens", str(args.spec_tokens)])
     if args.spec_method is not None:
