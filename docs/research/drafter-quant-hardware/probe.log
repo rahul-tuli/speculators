@@ -1,0 +1,10 @@
+INFO 09-21 12:30:59 [scheduler.py:277] Chunked prefill is enabled with max_num_batched_tokens=2048.
+INFO 09-21 12:30:59 [kernel.py:369] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+INFO 09-21 12:31:02 [__init__.py:1106] Using MarlinNvFp4LinearKernel for NVFP4 GEMM
+INFO 09-21 12:31:02 [__init__.py:1106] Using EmulationNvFp4LinearKernel for NVFP4 GEMM
+WARNING 09-21 12:31:02 [marlin.py:34] Your GPU does not have native support for FP4 computation but FP4 quantization is being used. Weight-only FP4 compression will be used leveraging the Marlin kernel. This may degrade performance for compute-heavy workloads.
+INFO 09-21 12:31:02 [marlin_utils.py:625] Marlin kernel can achieve better performance for small size_n with experimental use_atomic_add feature. You can consider set environment variable VLLM_MARLIN_USE_ATOMIC_ADD to 1 if possible.
+INFO 09-21 12:31:03 [deep_gemm.py:186] deep_gemm not found in site-packages, trying vendored vllm.third_party.deep_gemm
+INFO 09-21 12:31:03 [deep_gemm.py:213] DeepGEMM PDL enabled on vllm.third_party.deep_gemm.
+INFO 09-21 12:31:03 [deep_gemm.py:131] DeepGEMM E8M0 enabled on current platform.
+INFO 09-21 12:31:04 [__init__.py:1046] VLLM_BATCH_INVARIANT is set but the batch-invariant NVFP4 kernel is not supported on this platform; falling back to emulation for deterministic execution. Reason: CUTLASS FP4 kernels not available

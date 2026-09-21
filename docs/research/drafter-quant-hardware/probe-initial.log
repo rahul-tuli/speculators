@@ -1,0 +1,30 @@
+INFO 09-21 12:28:38 [__init__.py:1106] Using MarlinNvFp4LinearKernel for NVFP4 GEMM
+INFO 09-21 12:28:38 [__init__.py:1106] Using EmulationNvFp4LinearKernel for NVFP4 GEMM
+Traceback (most recent call last):
+  File "/tmp/drafter-quant-hardware.bgmDgr/docs/research/drafter-quant-hardware/probe.py", line 173, in <module>
+    main()
+  File "/tmp/drafter-quant-hardware.bgmDgr/docs/research/drafter-quant-hardware/probe.py", line 168, in main
+    result["kernels"] = kernel_checks(args.checkpoint_root)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/speculators/.venv/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/drafter-quant-hardware.bgmDgr/docs/research/drafter-quant-hardware/probe.py", line 111, in kernel_checks
+    scheme.create_weights(layer, [n], half_k * 2, torch.bfloat16, lambda *a: None)
+  File "/usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/quantization/compressed_tensors/schemes/compressed_tensors_w4a4_nvfp4.py", line 53, in create_weights
+    weight = ModelWeightParameter(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/vllm/model_executor/parameter.py", line 142, in __init__
+    super().__init__(**kwargs)
+  File "/usr/local/lib/python3.12/dist-packages/vllm/model_executor/parameter.py", line 214, in __init__
+    super().__init__(**kwargs)
+  File "/usr/local/lib/python3.12/dist-packages/vllm/model_executor/parameter.py", line 65, in __init__
+    self.tp_rank = get_tensor_model_parallel_rank()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/vllm/distributed/parallel_state.py", line 2212, in get_tensor_model_parallel_rank
+    return get_tp_group().rank_in_group
+           ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/vllm/distributed/parallel_state.py", line 1527, in get_tp_group
+    assert _TP is not None, "tensor model parallel group is not initialized"
+           ^^^^^^^^^^^^^^^
+AssertionError: tensor model parallel group is not initialized

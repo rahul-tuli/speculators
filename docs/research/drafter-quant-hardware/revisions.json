@@ -1,0 +1,22 @@
+{
+  "speculators": {
+    "path": "/workspace/speculators",
+    "head": "fd69f5326d695e98434196b3860956494f4c0004",
+    "status": " M AGENTS.md\n?? CONTEXT.md\n?? docs/agents/\n?? local/\n"
+  },
+  "vllm": {
+    "path": "/workspace/vllm",
+    "head": "98dff2a81d747d1dba01a47f939f48c3526d4206",
+    "status": " M tests/v1/spec_decode/test_dflash_causality.py\n M vllm/model_executor/models/qwen3_dflash.py\n M vllm/v1/worker/gpu/spec_decode/dflash/utils.py\n"
+  },
+  "compressed-tensors": {
+    "path": "/workspace/compressed-tensors",
+    "head": "a2a210e9001d6ac45b6f294f8a66a87384c7da55",
+    "status": ""
+  },
+  "llm-compressor": {
+    "path": "/workspace/llm-compressor",
+    "head": "0349b68f4a7c5b0b535596df8e8d171911c8acee",
+    "status": ""
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "scheme": "fp8_w8a8",
+  "model": "RedHatAI/Qwen3-8B-speculator.dflash",
+  "output_dir": "/data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-random",
+  "ignore": [
+    "lm_head",
+    "verifier_lm_head",
+    "re:.*embed_tokens.*"
+  ],
+  "calibration": "RANDOM SMOKE DATA (not valid for reported results)",
+  "num_calibration_samples": 1,
+  "seq_len": 512,
+  "seed": 0,
+  "timestamp": "2026-09-21T12:18:22.192873+00:00",
+  "source_revisions": {
+    "speculators": "fd69f5326d695e98434196b3860956494f4c0004",
+    "llm-compressor": "0349b68f4a7c5b0b535596df8e8d171911c8acee",
+    "compressed-tensors": "a2a210e9001d6ac45b6f294f8a66a87384c7da55"
+  }
+}

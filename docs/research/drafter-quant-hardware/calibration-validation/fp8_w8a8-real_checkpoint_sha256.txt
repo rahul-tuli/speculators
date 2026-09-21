@@ -1,0 +1,6 @@
+41822b340be27d601bc8d6f4002a46ab9b1d3b032631d679fb662f55a67ad37f  /data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-real/calibration_manifest.json
+8b60079db4a736c593d1cc0c7cc04ecc9794a8f5c53f21f42bcbb511eb1a9b27  /data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-real/config.json
+23938cffa544a650f0f966838d694bb570e26940c50b68d6671889a2a9b400ba  /data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-real/model.safetensors
+f330ced10d0fe748b83cde613d9b296530525b07a746e024fb5d5810c011dd64  /data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-real/quant_run_manifest.json
+be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506  /data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-real/tokenizer.json
+c4f4c62b741ab2940841480f9942f378d7d3878d47c2babb862af7381c59b952  /data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-real/tokenizer_config.json

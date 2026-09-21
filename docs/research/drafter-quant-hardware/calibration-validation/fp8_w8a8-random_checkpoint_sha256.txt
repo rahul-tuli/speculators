@@ -1,0 +1,6 @@
+8c520cee2372f114452f1522d34020828ea3fe0b18f79d184a4511c3f2833b9f  /data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-random/calibration_manifest.json
+8b60079db4a736c593d1cc0c7cc04ecc9794a8f5c53f21f42bcbb511eb1a9b27  /data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-random/config.json
+5af190d607740b105c5550b9ff1d96a51c9ee4ae545887f0c7682936d0e9a2d7  /data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-random/model.safetensors
+161d27ac56322dc82c497a8c3d119b012ff2ab54613451c3fb3dffef2a70a960  /data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-random/quant_run_manifest.json
+be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506  /data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-random/tokenizer.json
+c4f4c62b741ab2940841480f9942f378d7d3878d47c2babb862af7381c59b952  /data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-random/tokenizer_config.json

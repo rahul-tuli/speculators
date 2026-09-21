@@ -1,0 +1,30 @@
+[
+  {
+    "run": "fp8_w8a8-random",
+    "finite_positive_scale_tensors": 72,
+    "activation_scale_tensors": 36,
+    "actual_tokens": 512,
+    "loss_mask_tokens": 512
+  },
+  {
+    "run": "fp8_w8a8-real",
+    "finite_positive_scale_tensors": 72,
+    "activation_scale_tensors": 36,
+    "actual_tokens": 512,
+    "loss_mask_tokens": 34
+  },
+  {
+    "run": "nvfp4_w4a4-random",
+    "finite_positive_scale_tensors": 108,
+    "activation_scale_tensors": 36,
+    "actual_tokens": 512,
+    "loss_mask_tokens": 512
+  },
+  {
+    "run": "nvfp4_w4a4-real",
+    "finite_positive_scale_tensors": 108,
+    "activation_scale_tensors": 36,
+    "actual_tokens": 512,
+    "loss_mask_tokens": 34
+  }
+]

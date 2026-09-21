@@ -1,0 +1,56 @@
+{
+  "installed_root": "/usr/local/lib/python3.12/dist-packages/vllm",
+  "checkout_root": "/workspace/vllm/vllm",
+  "files": {
+    "model_executor/kernels/linear/__init__.py": {
+      "checkout_sha256": "f3e7489e871c17cc4a4bfc1dfdd45ff5589041e93bd61c540d0c443f4b1a3845",
+      "installed_sha256": "f3e7489e871c17cc4a4bfc1dfdd45ff5589041e93bd61c540d0c443f4b1a3845",
+      "equal": true
+    },
+    "model_executor/kernels/linear/nvfp4/emulation.py": {
+      "checkout_sha256": "5df332e81ad748e985e11cb6b1c9d1ce2e84c63358365430632e001cd676e1aa",
+      "installed_sha256": "5df332e81ad748e985e11cb6b1c9d1ce2e84c63358365430632e001cd676e1aa",
+      "equal": true
+    },
+    "model_executor/kernels/linear/nvfp4/marlin.py": {
+      "checkout_sha256": "6dd9892f215049f24bd6479cca32463a6256baba5957b3ed549e35f210502e06",
+      "installed_sha256": "6dd9892f215049f24bd6479cca32463a6256baba5957b3ed549e35f210502e06",
+      "equal": true
+    },
+    "model_executor/kernels/linear/nvfp4/cutlass.py": {
+      "checkout_sha256": "a0e5e3c25c19c351aa5c8a25346a6c01f1618745bbb2ace4e2f9d8a9200d7146",
+      "installed_sha256": "a0e5e3c25c19c351aa5c8a25346a6c01f1618745bbb2ace4e2f9d8a9200d7146",
+      "equal": true
+    },
+    "model_executor/kernels/linear/scaled_mm/cutlass.py": {
+      "checkout_sha256": "d01b6fe09e3c3fa3991045f6ac7b469a58a550c56426ffd8900badbbe7e5355b",
+      "installed_sha256": "d01b6fe09e3c3fa3991045f6ac7b469a58a550c56426ffd8900badbbe7e5355b",
+      "equal": true
+    },
+    "model_executor/layers/quantization/utils/nvfp4_emulation_utils.py": {
+      "checkout_sha256": "6d85eeb25ce393fdb6ef3acbc5ea8ed706421e04764e5943b1905c0ef0adf1aa",
+      "installed_sha256": "6d85eeb25ce393fdb6ef3acbc5ea8ed706421e04764e5943b1905c0ef0adf1aa",
+      "equal": true
+    },
+    "model_executor/layers/quantization/compressed_tensors/schemes/compressed_tensors_w4a4_nvfp4.py": {
+      "checkout_sha256": "17c515ce7d5f3e8464ce70674f542facff430c083c1fd6a52831b322c14e737c",
+      "installed_sha256": "17c515ce7d5f3e8464ce70674f542facff430c083c1fd6a52831b322c14e737c",
+      "equal": true
+    },
+    "model_executor/layers/quantization/compressed_tensors/schemes/compressed_tensors_w8a8_fp8.py": {
+      "checkout_sha256": "7ff9cc219dde01271ffc7e46466cf757414f311b25bad558374d0e6c0c5a7ec4",
+      "installed_sha256": "7ff9cc219dde01271ffc7e46466cf757414f311b25bad558374d0e6c0c5a7ec4",
+      "equal": true
+    },
+    "model_executor/models/qwen3_dflash.py": {
+      "checkout_sha256": "a3fabc38f71f454438f4a60bb511241938585628f7c8a59b6f8b7adb9c8389b7",
+      "installed_sha256": "a3fabc38f71f454438f4a60bb511241938585628f7c8a59b6f8b7adb9c8389b7",
+      "equal": true
+    },
+    "model_executor/models/qwen3_dspark.py": {
+      "checkout_sha256": "77d9707385fe0ac15651ccd442864989694c57262076e9a2dbc69c8557dc31dd",
+      "installed_sha256": "77d9707385fe0ac15651ccd442864989694c57262076e9a2dbc69c8557dc31dd",
+      "equal": true
+    }
+  }
+}

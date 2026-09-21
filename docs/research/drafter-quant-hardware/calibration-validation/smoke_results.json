@@ -1,0 +1,26 @@
+[
+  {
+    "name": "fp8_w8a8-real",
+    "exit_code": 0,
+    "elapsed_seconds": 21.262014457024634,
+    "output_dir": "/data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-real"
+  },
+  {
+    "name": "fp8_w8a8-random",
+    "exit_code": 0,
+    "elapsed_seconds": 14.882408385165036,
+    "output_dir": "/data/fast/drafter-quant/validation/calibration-input-20260921/fp8_w8a8-random"
+  },
+  {
+    "name": "nvfp4_w4a4-real",
+    "exit_code": 0,
+    "elapsed_seconds": 20.792433125898242,
+    "output_dir": "/data/fast/drafter-quant/validation/calibration-input-20260921/nvfp4_w4a4-real"
+  },
+  {
+    "name": "nvfp4_w4a4-random",
+    "exit_code": 0,
+    "elapsed_seconds": 20.149009694345295,
+    "output_dir": "/data/fast/drafter-quant/validation/calibration-input-20260921/nvfp4_w4a4-random"
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "target": "Qwen/Qwen3-8B",
+  "captured_layers": [
+    2,
+    10,
+    18,
+    26,
+    34,
+    36
+  ],
+  "capture_command_sha256": "f3c412b4f5ca82c4b8b8dc411244766da34aa014ae0a47dd21e36da091bebffd",
+  "cache_path": "/data/fast/drafter-quant/data/perfectblend_2048_prepared",
+  "available_samples": 2027,
+  "available_tokens": 3462008,
+  "hidden_size": 4096,
+  "storage_dtype": "F8_E4M3",
+  "cache_header_stat_sha256": "172a60cbb1f7e9e1ebcabfa04f4c771b9eb6318e40233d8eff86e806371fa695",
+  "dataset_sha256": {
+    "data-00000-of-00001.arrow": "9f337c4780f0d43da7bf5cf5e1b29378f26ab13cc16048d61762923c64fa8034"
+  },
+  "requested_samples": 1,
+  "actual_samples": 1,
+  "requested_token_capacity": 512,
+  "actual_tokens": 512,
+  "loss_mask_tokens": 34,
+  "selected_indices": [
+    1602
+  ],
+  "seq_len": 512,
+  "seed": 0,
+  "decoded_dtype": "bfloat16"
+}
