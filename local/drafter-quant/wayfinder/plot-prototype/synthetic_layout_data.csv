@@ -1,0 +1,61 @@
+synthetic,run_id,config,aggregation,arm,concurrency,calibration_seed,evaluation_repeat,status,draft_events,accepted_draft_tokens,proposed_draft_tokens,acceptance_length
+true,synthetic-0-0-0,qualitative,pooled_config,BF16 drafter,1,,0,complete,10000,37300,70000,4.73
+true,synthetic-0-0-1,qualitative,pooled_config,BF16 drafter,1,,1,complete,10000,38200,70000,4.82
+true,synthetic-0-0-2,qualitative,pooled_config,BF16 drafter,1,,2,complete,10000,38500,70000,4.85
+true,synthetic-0-1-0,qualitative,pooled_config,FP8 · Gaussian,1,0,0,complete,10000,33695,70000,4.3695
+true,synthetic-0-1-1,qualitative,pooled_config,FP8 · Gaussian,1,0,1,complete,10000,34730,70000,4.473
+true,synthetic-0-1-2,qualitative,pooled_config,FP8 · Gaussian,1,0,2,complete,10000,35075,70000,4.5075
+true,synthetic-0-2-0,qualitative,pooled_config,FP8 · real,1,0,0,complete,10000,35190,70000,4.519
+true,synthetic-0-2-1,qualitative,pooled_config,FP8 · real,1,0,1,complete,10000,36360,70000,4.636
+true,synthetic-0-2-2,qualitative,pooled_config,FP8 · real,1,0,2,complete,10000,36750,70000,4.675
+true,synthetic-0-3-0,qualitative,pooled_config,NVFP4 · Gaussian,1,0,0,complete,10000,26685,70000,3.6685
+true,synthetic-0-3-1,qualitative,pooled_config,NVFP4 · Gaussian,1,0,1,complete,10000,27990,70000,3.799
+true,synthetic-0-3-2,qualitative,pooled_config,NVFP4 · Gaussian,1,0,2,complete,10000,28425,70000,3.8425
+true,synthetic-0-4-0,qualitative,pooled_config,NVFP4 · real,1,0,0,complete,10000,29680,70000,3.968
+true,synthetic-0-4-1,qualitative,pooled_config,NVFP4 · real,1,0,1,complete,10000,31120,70000,4.112
+true,synthetic-0-4-2,qualitative,pooled_config,NVFP4 · real,1,0,2,complete,10000,31600,70000,4.16
+true,synthetic-1-0-0,throughput_1k,pooled_config,BF16 drafter,1,,0,complete,10000,41300,70000,5.13
+true,synthetic-1-0-1,throughput_1k,pooled_config,BF16 drafter,1,,1,complete,10000,42200,70000,5.22
+true,synthetic-1-0-2,throughput_1k,pooled_config,BF16 drafter,1,,2,complete,10000,42500,70000,5.25
+true,synthetic-1-1-0,throughput_1k,pooled_config,FP8 · Gaussian,1,0,0,complete,10000,38295,70000,4.8294999999999995
+true,synthetic-1-1-1,throughput_1k,pooled_config,FP8 · Gaussian,1,0,1,complete,10000,39330,70000,4.933
+true,synthetic-1-1-2,throughput_1k,pooled_config,FP8 · Gaussian,1,0,2,complete,10000,39675,70000,4.967499999999999
+true,synthetic-1-2-0,throughput_1k,pooled_config,FP8 · real,1,0,0,complete,10000,39690,70000,4.968999999999999
+true,synthetic-1-2-1,throughput_1k,pooled_config,FP8 · real,1,0,1,complete,10000,40860,70000,5.086
+true,synthetic-1-2-2,throughput_1k,pooled_config,FP8 · real,1,0,2,complete,10000,41250,70000,5.125
+true,synthetic-1-3-0,throughput_1k,pooled_config,NVFP4 · Gaussian,1,0,0,complete,10000,29985,70000,3.9985
+true,synthetic-1-3-1,throughput_1k,pooled_config,NVFP4 · Gaussian,1,0,1,complete,10000,31290,70000,4.129
+true,synthetic-1-3-2,throughput_1k,pooled_config,NVFP4 · Gaussian,1,0,2,complete,10000,31725,70000,4.172499999999999
+true,synthetic-1-4-0,throughput_1k,pooled_config,NVFP4 · real,1,0,0,complete,10000,33780,70000,4.378
+true,synthetic-1-4-1,throughput_1k,pooled_config,NVFP4 · real,1,0,1,complete,10000,35220,70000,4.522
+true,synthetic-1-4-2,throughput_1k,pooled_config,NVFP4 · real,1,0,2,complete,10000,35700,70000,4.57
+true,synthetic-2-0-0,throughput_2k,pooled_config,BF16 drafter,1,,0,complete,10000,34300,70000,4.43
+true,synthetic-2-0-1,throughput_2k,pooled_config,BF16 drafter,1,,1,complete,10000,35200,70000,4.52
+true,synthetic-2-0-2,throughput_2k,pooled_config,BF16 drafter,1,,2,complete,10000,35500,70000,4.55
+true,synthetic-2-1-0,throughput_2k,pooled_config,FP8 · Gaussian,1,0,0,complete,10000,31295,70000,4.1295
+true,synthetic-2-1-1,throughput_2k,pooled_config,FP8 · Gaussian,1,0,1,complete,10000,32330,70000,4.2330000000000005
+true,synthetic-2-1-2,throughput_2k,pooled_config,FP8 · Gaussian,1,0,2,complete,10000,32675,70000,4.2675
+true,synthetic-2-2-0,throughput_2k,pooled_config,FP8 · real,1,0,0,complete,10000,32490,70000,4.2490000000000006
+true,synthetic-2-2-1,throughput_2k,pooled_config,FP8 · real,1,0,1,complete,10000,33660,70000,4.366
+true,synthetic-2-2-2,throughput_2k,pooled_config,FP8 · real,1,0,2,complete,10000,34050,70000,4.404999999999999
+true,synthetic-2-3-0,throughput_2k,pooled_config,NVFP4 · Gaussian,1,0,0,complete,10000,23885,70000,3.3885
+true,synthetic-2-3-1,throughput_2k,pooled_config,NVFP4 · Gaussian,1,0,1,complete,10000,25190,70000,3.519
+true,synthetic-2-3-2,throughput_2k,pooled_config,NVFP4 · Gaussian,1,0,2,complete,10000,25625,70000,3.5625
+true,synthetic-2-4-0,throughput_2k,pooled_config,NVFP4 · real,1,0,0,complete,10000,26780,70000,3.678
+true,synthetic-2-4-1,throughput_2k,pooled_config,NVFP4 · real,1,0,1,complete,10000,28220,70000,3.822
+true,synthetic-2-4-2,throughput_2k,pooled_config,NVFP4 · real,1,0,2,complete,10000,28700,70000,3.87
+true,synthetic-3-0-0,throughput_8k,pooled_config,BF16 drafter,1,,0,complete,10000,28300,70000,3.83
+true,synthetic-3-0-1,throughput_8k,pooled_config,BF16 drafter,1,,1,complete,10000,29200,70000,3.92
+true,synthetic-3-0-2,throughput_8k,pooled_config,BF16 drafter,1,,2,complete,10000,29500,70000,3.95
+true,synthetic-3-1-0,throughput_8k,pooled_config,FP8 · Gaussian,1,0,0,complete,10000,23995,70000,3.3995
+true,synthetic-3-1-1,throughput_8k,pooled_config,FP8 · Gaussian,1,0,1,complete,10000,25030,70000,3.503
+true,synthetic-3-1-2,throughput_8k,pooled_config,FP8 · Gaussian,1,0,2,complete,10000,25375,70000,3.5375
+true,synthetic-3-2-0,throughput_8k,pooled_config,FP8 · real,1,0,0,complete,10000,26490,70000,3.649
+true,synthetic-3-2-1,throughput_8k,pooled_config,FP8 · real,1,0,1,complete,10000,27660,70000,3.766
+true,synthetic-3-2-2,throughput_8k,pooled_config,FP8 · real,1,0,2,complete,10000,28050,70000,3.805
+true,synthetic-3-3-0,throughput_8k,pooled_config,NVFP4 · Gaussian,1,0,0,complete,10000,18185,70000,2.8185000000000002
+true,synthetic-3-3-1,throughput_8k,pooled_config,NVFP4 · Gaussian,1,0,1,complete,10000,19490,70000,2.949
+true,synthetic-3-3-2,throughput_8k,pooled_config,NVFP4 · Gaussian,1,0,2,complete,10000,19925,70000,2.9924999999999997
+true,synthetic-3-4-0,throughput_8k,pooled_config,NVFP4 · real,1,0,0,unsupported,,,,
+true,synthetic-3-4-1,throughput_8k,pooled_config,NVFP4 · real,1,0,1,unsupported,,,,
+true,synthetic-3-4-2,throughput_8k,pooled_config,NVFP4 · real,1,0,2,unsupported,,,,
