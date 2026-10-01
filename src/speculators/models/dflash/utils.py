@@ -42,6 +42,11 @@ def select_anchors(
         raise ValueError(f"Expected block size > 0, got {block_size}")
 
     valid_mask = loss_mask.bool().clone()
+    # An anchor is only usable if its own position and the position right after
+    # it are both supervised: the block's first prediction target is
+    # anchor + 1, so an isolated supervised token yields no gradient.
+    # Matches TorchSpec/SpecForge anchor eligibility.
+    valid_mask[:, :-1] &= loss_mask[:, 1:].bool()
     valid_mask[:, -block_size:] = False
 
     valid_indices = torch.nonzero(valid_mask.squeeze(0), as_tuple=False).squeeze(

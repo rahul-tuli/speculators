@@ -469,8 +469,11 @@ class DFlashArgs(_Group):
         description="Sample from the anchor position (all positions predict). "
         "Default: False for dflash/dflash2, True for dspark.",
     )
-    dflash_decay_gamma: float = Field(
-        default=4.0, description="Decay gamma for DFlash-family loss weighting."
+    dflash_decay_gamma: float | None = Field(
+        default=None,
+        description="Decay gamma for DFlash-family loss weighting "
+        "(default: 7.0 for dflash2, matching the published reproduction "
+        "recipe; 4.0 otherwise).",
     )
     per_position_loss_weight: Literal["fixed-exp-decay", "dpace"] | None = Field(
         default=None,
@@ -504,6 +507,14 @@ class DFlash2Args(_Group):
         default=1.0,
         ge=0.0,
         description="DFlash2: weight of the candidate-selector K-way CE term.",
+    )
+    selector_candidate_mode: Literal["strict-topk", "inject"] = Field(
+        default="strict-topk",
+        description="DFlash2: selector training candidate set. 'strict-topk' "
+        "(default, serving-aligned; the published reproduction recipe's "
+        "choice) trains only on the unary top-k and gates out coverage "
+        "misses. 'inject' splices a missing target into the weakest "
+        "candidate slot and trains every position (ablation).",
     )
 
 
@@ -692,8 +703,8 @@ class TrainConfig(BaseSettings):
         else ``False``; unset ``muon_lr`` -> ``lr``; unset ``num_layers`` -> ``5``
         for dflash/dspark/dflash2 else ``1``; unset ``per_position_loss_weight`` ->
         ``dpace`` for dflash else ``fixed-exp-decay``; unset ``loss_fn`` -> ``ce`` for
-        dflash else ``kl_div``; unset ``block_size`` -> ``16`` for dflash else
-        ``8``.
+        dflash/dflash2 else ``kl_div``; unset ``block_size`` -> ``16`` for dflash else
+        ``8``; unset ``dflash_decay_gamma`` -> ``7.0`` for dflash2 else ``4.0``.
 
         The dflash-conditional defaults reflect the recipe from
         https://github.com/vllm-project/speculators/issues/979: this combination
@@ -703,9 +714,11 @@ class TrainConfig(BaseSettings):
         out-of-the-box behavior for ``--speculator-type dflash`` rather than
         something users need to separately discover and opt into. DSpark
         (which shares the ``dflash`` group) keeps ``block_size=8``, since that
-        combination was never tested there. DFlash2 shares the ``dflash`` group
-        and uses five layers, while keeping ``block_size=8``, fixed exponential
-        position weights, and KL loss for direct comparison with DSpark.
+        combination was never tested there. DFlash2 follows the published
+        DFlash 2 reproduction recipe (hard-target cross-entropy,
+        ``loss_decay_gamma=7``, strict top-k selector objective), which
+        reproduces the authors' reported acceptance lengths; KL remains
+        available via ``--loss-fn kl_div`` for DSpark comparison runs.
         ``--muon-lr`` / ``--lr`` are
         deliberately left as-is: the right learning rate depends on effective
         batch size (anchor count, sequence length, GPU count), which varies by
@@ -716,6 +729,7 @@ class TrainConfig(BaseSettings):
         """
         is_eagle3 = self.speculator_type == "eagle3"
         is_dflash = self.speculator_type == "dflash"
+        is_dflash2 = self.speculator_type == "dflash2"
         is_dflash_family = self.speculator_type in {"dflash", "dspark", "dflash2"}
         if self.draft.draft_arch is None:
             self.draft.draft_arch = "llama" if is_eagle3 else "qwen3"
@@ -734,9 +748,11 @@ class TrainConfig(BaseSettings):
                 "dpace" if is_dflash else "fixed-exp-decay"
             )
         if self.loss.loss_fn is None:
-            self.loss.loss_fn = "ce" if is_dflash else "kl_div"
+            self.loss.loss_fn = "ce" if is_dflash or is_dflash2 else "kl_div"
         if self.dflash.block_size is None:
             self.dflash.block_size = 16 if is_dflash else 8
+        if self.dflash.dflash_decay_gamma is None:
+            self.dflash.dflash_decay_gamma = 7.0 if is_dflash2 else 4.0
         return self
 
     @model_validator(mode="after")

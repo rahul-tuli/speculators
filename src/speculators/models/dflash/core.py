@@ -371,6 +371,13 @@ class DFlashDraftModel(DraftVocabMixin, SpeculatorModel):
 
         return full_attn_mask, sliding_window_attn_mask, anchor_positions, anchor_valid
 
+    def _scale_noise_embedding(self, noise_embedding: torch.Tensor) -> torch.Tensor:
+        """Hook for variants that scale noise embeddings (e.g. DFlash2's
+        ``input_embedding_scale`` from the reference checkpoint contract).
+        Identity for the base DFlash model.
+        """
+        return noise_embedding
+
     def _backbone_forward(
         self,
         hidden_states: torch.Tensor,  # [1, total_seq_len, num_hidden*hidden_size]
@@ -410,6 +417,7 @@ class DFlashDraftModel(DraftVocabMixin, SpeculatorModel):
         )  # shape: [1, num_anchors*block_size]
         mask_token_ids[:, :: self.block_size] = input_ids[:, anchor_positions]
         noise_embedding = self.embed_tokens(mask_token_ids)
+        noise_embedding = self._scale_noise_embedding(noise_embedding)
         # shape: [1, num_anchors*block_size, hidden_size]
 
         fc_output = self.fc(hidden_states)

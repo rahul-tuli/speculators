@@ -262,7 +262,12 @@ class CandidateSelector(nn.Module):
         self.successor_codebook = nn.Parameter(torch.empty(vocab_size, rank))
         self.hidden_projection = nn.Linear(hidden_size, rank, bias=False)
         nn.init.normal_(self.predecessor_codebook, std=initializer_range)
-        nn.init.normal_(self.successor_codebook, std=initializer_range)
+        # The transition term starts as an exact no-op so a fresh DFlash2
+        # selector is numerically identical to the unary DFlash proposal
+        # (SpecForge's initialization). The successor factor receives gradient
+        # first; the predecessor and hidden factors receive signal once the
+        # transition term becomes non-zero.
+        nn.init.zeros_(self.successor_codebook)
         nn.init.normal_(self.hidden_projection.weight, std=initializer_range)
 
     def context(

@@ -383,7 +383,9 @@ def test_resolve_dflash2_flags_and_derived_defaults():
     flat = cfg.flatten()
     assert flat["num_layers"] == 5
     assert flat["block_size"] == 8
-    assert flat["loss_fn"] == "kl_div"
+    assert flat["loss_fn"] == "ce"
+    assert flat["dflash_decay_gamma"] == 7.0
+    assert flat["selector_candidate_mode"] == "strict-topk"
     assert flat["sliding_window_non_causal"] is True
     assert flat["conv_kernel_size"] == 3
     assert flat["conv_group_size"] == 8
