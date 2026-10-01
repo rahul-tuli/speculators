@@ -12,6 +12,7 @@ from speculators.models.dflash2.config import DFlash2SpeculatorConfig
 from speculators.models.dflash2.metrics import (
     compute_metrics,
     selector_training_candidates,
+    strict_topk_selector_targets,
 )
 from speculators.models.dflash2.model_definitions import (
     CandidateSelector,
@@ -24,6 +25,8 @@ __all__ = [
 ]
 
 _DEFAULT_LOSS_CONFIG: LossConfig = {"kl_div": (kl_div_loss, 1.0)}
+
+_SELECTOR_CANDIDATE_MODES = ("strict-topk", "inject")
 
 
 @SpeculatorModel.register("dflash2")
@@ -90,6 +93,9 @@ class DFlash2DraftModel(DFlashDraftModel):
             conv_group_size=kwargs.get("conv_group_size", 16),
             selector_rank=kwargs.get("selector_rank", 256),
             selector_top_k=kwargs.get("selector_top_k", 16),
+            output_multiplier=kwargs.get("output_multiplier", 1.0),
+            final_logit_softcapping=kwargs.get("final_logit_softcapping"),
+            input_embedding_scale=kwargs.get("input_embedding_scale", 1.0),
         )
         model = cls(config=config)
         model.load_vocab_mappings(t2d, d2t)
@@ -105,15 +111,45 @@ class DFlash2DraftModel(DFlashDraftModel):
         shared = {
             "loss_config": loss_config,
             "tv_loss_fn": tv_loss_fn,
-            "gamma": kwargs.get("dflash_decay_gamma", 4.0),
+            # DFlash2 defaults follow the published reproduction recipe
+            # (hard-target CE, loss_decay_gamma=7, strict top-k selector).
+            "gamma": kwargs.get("dflash_decay_gamma", 7.0),
             "max_anchors": kwargs.get("max_anchors", 512),
             "per_position_loss_weight": kwargs.get(
                 "per_position_loss_weight", "fixed-exp-decay"
             ),
             "dpace_alpha": kwargs.get("dpace_alpha", 0.5),
             "selector_loss_alpha": kwargs.get("selector_loss_alpha", 1.0),
+            "selector_candidate_mode": kwargs.get(
+                "selector_candidate_mode", "strict-topk"
+            ),
         }
         return dict(shared), dict(shared)
+
+    def transform_unary_logits(self, logits: torch.Tensor) -> torch.Tensor:
+        """Apply the checkpoint-contract unary transform (multiplier, softcap).
+
+        Serving engines apply ``output_multiplier`` and
+        ``final_logit_softcapping`` from ``dflash_config`` before the selector
+        adds its transition scores, so training must score against the same
+        transformed logits. Identity for the Qwen3.8-27B recipe (multiplier
+        1.0, no softcap).
+        """
+        multiplier = float(self.config.output_multiplier)
+        softcap = self.config.final_logit_softcapping
+        if multiplier == 1.0 and softcap is None:
+            return logits
+        logits = logits.float() * multiplier
+        if softcap is not None:
+            softcap = float(softcap)
+            logits = torch.tanh(logits / softcap) * softcap
+        return logits
+
+    def _scale_noise_embedding(self, noise_embedding: torch.Tensor) -> torch.Tensor:
+        scale = float(self.config.input_embedding_scale)
+        if scale == 1.0:
+            return noise_embedding
+        return noise_embedding * scale
 
     def _predecessor_ids(
         self,
@@ -139,9 +175,10 @@ class DFlash2DraftModel(DFlashDraftModel):
         position_ids: torch.Tensor | None = None,  # shape: [1, total_seq_len]
         loss_config: LossConfig | None = None,
         tv_loss_fn: Callable[[torch.Tensor, torch.Tensor], torch.Tensor] = tv_loss,
-        gamma: float = 4.0,
+        gamma: float = 7.0,
         max_anchors: int = 512,
         selector_loss_alpha: float = 1.0,
+        selector_candidate_mode: str = "strict-topk",
         per_position_loss_weight: str = "fixed-exp-decay",
         dpace_alpha: float = 0.5,
         **kwargs,
@@ -158,15 +195,37 @@ class DFlash2DraftModel(DFlashDraftModel):
                 **kwargs,
             )
         )
+        # Score against the same transformed logits serving uses (M3 contract).
+        unary_logits = self.transform_unary_logits(unary_logits)
         predecessor_ids = self._predecessor_ids(input_ids, block_indices)
 
         target_ids = targets.argmax(dim=-1)
         # shape: [1, num_anchors*block_size]
         candidate_ids = unary_logits.topk(self.candidate_selector.top_k, dim=-1).indices
         # shape: [1, num_anchors*block_size, top_k]
-        training_candidate_ids, target_positions, contains_target = (
-            selector_training_candidates(candidate_ids, target_ids)
-        )
+        if selector_candidate_mode == "strict-topk":
+            # Serving-aligned default: the selector re-ranks exactly the unary
+            # top-k; coverage misses are a backbone/recall failure and produce
+            # no selector gradient.
+            target_positions, contains_target = strict_topk_selector_targets(
+                candidate_ids, target_ids
+            )
+            training_candidate_ids = candidate_ids
+            selector_loss_mask = aligned_loss_mask * contains_target.to(
+                aligned_loss_mask.dtype
+            )
+        elif selector_candidate_mode == "inject":
+            # Ablation: splice a missing hard target into the weakest candidate
+            # slot and train the selector on every position.
+            training_candidate_ids, target_positions, contains_target = (
+                selector_training_candidates(candidate_ids, target_ids)
+            )
+            selector_loss_mask = aligned_loss_mask
+        else:
+            raise ValueError(
+                f"Unknown selector_candidate_mode {selector_candidate_mode!r}; "
+                f"expected one of {_SELECTOR_CANDIDATE_MODES}."
+            )
         candidate_logits = self.candidate_selector.score_candidates(
             unary_logits,
             hidden,
@@ -191,5 +250,6 @@ class DFlash2DraftModel(DFlashDraftModel):
             selector_loss_alpha=selector_loss_alpha,
             per_position_loss_weight=per_position_loss_weight,
             dpace_alpha=dpace_alpha,
+            selector_loss_mask=selector_loss_mask,
         )
         return None, loss, metrics

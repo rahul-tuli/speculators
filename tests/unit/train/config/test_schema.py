@@ -66,7 +66,10 @@ def test_flatten_resolves_dflash2_derived_defaults():
     flat = TrainConfig(speculator_type="dflash2").flatten()
     assert flat["num_layers"] == 5
     assert flat["per_position_loss_weight"] == "fixed-exp-decay"
-    assert flat["loss_fn"] == "kl_div"
+    # Reproduction-recipe defaults: hard-target CE, gamma=7, strict top-k selector.
+    assert flat["loss_fn"] == "ce"
+    assert flat["dflash_decay_gamma"] == 7.0
+    assert flat["selector_candidate_mode"] == "strict-topk"
     assert flat["block_size"] == 8
     assert flat["conv_kernel_size"] == 2
     assert flat["conv_group_size"] == 16

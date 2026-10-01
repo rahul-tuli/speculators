@@ -5,7 +5,6 @@ analytical TV-overlap estimate over the unary logits.
 """
 
 from collections.abc import Callable
-from functools import partial
 from typing import Any
 
 import torch
@@ -15,9 +14,9 @@ from speculators.losses import (
     LossConfig,
     dflash_loss_decay,
     dpace_loss_decay,
-    loss_function,
     tv_loss,
 )
+from speculators.losses.utils import _LOSS_REDUCTION_EPS
 from speculators.models.dspark.metrics import compute_metrics as compute_unary_metrics
 from speculators.models.metrics import compute_accepted_length_counts
 
@@ -25,6 +24,7 @@ __all__ = [
     "compute_metrics",
     "compute_selector_loss",
     "selector_training_candidates",
+    "strict_topk_selector_targets",
 ]
 
 
@@ -62,6 +62,28 @@ def selector_training_candidates(
     return training_candidate_ids, target_positions, contains_target
 
 
+def strict_topk_selector_targets(
+    candidate_ids: torch.Tensor,  # [*, top_k]
+    target_ids: torch.Tensor,  # [*]
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Labels over the strict serving top-k, with no target injection.
+
+    Serving re-ranks exactly the unary top-k, so the selector objective is a
+    K-way classification over that set and nothing else: positions whose hard
+    target fell outside the top-k are backbone/recall failures and must not
+    produce selector gradient. Matches SpecForge's ``_selector_chunk_terms``
+    and the published DFlash2 reproduction recipe, which found the strict
+    top-k selector objective gave the best serving acceptance length.
+
+    Returns (target_positions, contains_target); callers gate the selector
+    loss with ``contains_target``.
+    """
+    target_matches = candidate_ids.eq(target_ids.unsqueeze(-1))
+    contains_target = target_matches.any(dim=-1)
+    target_positions = target_matches.to(torch.int64).argmax(dim=-1)
+    return target_positions, contains_target
+
+
 def _candidate_cross_entropy(
     logits: torch.Tensor,  # [*, top_k]
     target_positions: torch.Tensor,  # [*]
@@ -84,32 +106,43 @@ def compute_selector_loss(
     dpace_alpha: float,
     sample_from_anchor: bool = False,
 ) -> torch.Tensor:
-    """Compute teacher-forced hard CE over the runtime-sized candidate set."""
+    """Compute teacher-forced hard CE over the runtime-sized candidate set.
+
+    The numerator is decay-weighted exactly like the unary objective, and the
+    denominator is the same decay-weighted mask mass the reference
+    implementations (TorchSpec, SpecForge) normalize by — not the undecayed
+    mask count. Normalizing by the undecayed count would silently scale the
+    selector term by ``mask.sum() / (mask * decay).sum()`` (~1.5-2x for the
+    usual gamma/block-size combinations) relative to ``selector_loss_alpha``.
+    The CE runs in fp32 for numerical parity with the references.
+    """
     pos_idx = (
         torch.arange(candidate_logits.shape[1], device=candidate_logits.device)
         % block_size
     ).unsqueeze(0)
+    elementwise_loss = _candidate_cross_entropy(
+        candidate_logits.float(), target_positions
+    )
+    loss_mask = loss_mask.to(elementwise_loss.dtype)
+    elementwise_loss = elementwise_loss * loss_mask
+
     if per_position_loss_weight == "dpace":
-        decay_fn = partial(
-            dpace_loss_decay,
+        decay_mult = dpace_loss_decay(
+            pos_idx.to(elementwise_loss.dtype),
             loss_mask=loss_mask,
             block_size=block_size,
             dpace_alpha=dpace_alpha,
+            elementwise_loss=elementwise_loss,
         )
     else:
-        decay_fn = partial(
-            dflash_loss_decay,
+        decay_mult = dflash_loss_decay(
+            pos_idx.to(elementwise_loss.dtype),
             gamma=gamma,
             sample_from_anchor=sample_from_anchor,
         )
-    return loss_function(
-        candidate_logits,
-        target_positions,
-        loss_mask,
-        pos_idx,
-        loss_fn=_candidate_cross_entropy,
-        decay_fn=decay_fn,
-    )
+    weighted_loss = elementwise_loss * decay_mult
+    denominator = (loss_mask * decay_mult).sum(dim=1) + _LOSS_REDUCTION_EPS
+    return (weighted_loss.sum(dim=1) / denominator).mean()
 
 
 def compute_metrics(
@@ -130,8 +163,17 @@ def compute_metrics(
     selector_loss_alpha: float = 1.0,
     per_position_loss_weight: str = "fixed-exp-decay",
     dpace_alpha: float = 0.5,
+    selector_loss_mask: torch.Tensor | None = None,
 ) -> tuple[torch.Tensor, dict[str, Any]]:
-    """Combine the unary DFlash objective with a K-way selector objective."""
+    """Combine the unary DFlash objective with a K-way selector objective.
+
+    ``selector_loss_mask`` gates which positions produce selector gradient;
+    under the strict top-k objective it is ``loss_mask * contains_target`` so
+    coverage misses (a backbone/recall failure) teach the selector nothing.
+    Defaults to ``loss_mask``, matching the candidate-injection ablation.
+    """
+    if selector_loss_mask is None:
+        selector_loss_mask = loss_mask
     unary_loss, metrics = compute_unary_metrics(
         unary_logits,
         targets,
@@ -149,7 +191,7 @@ def compute_metrics(
     selector_loss = compute_selector_loss(
         candidate_logits,
         target_positions,
-        loss_mask,
+        selector_loss_mask,
         block_size,
         gamma=gamma,
         per_position_loss_weight=per_position_loss_weight,

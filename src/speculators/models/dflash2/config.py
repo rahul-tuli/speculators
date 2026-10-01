@@ -43,3 +43,25 @@ class DFlash2SpeculatorConfig(DFlashSpeculatorConfig):
         ge=1,
         description="Number of unary candidates reranked during inference.",
     )
+    output_multiplier: float = Field(
+        default=1.0,
+        gt=0,
+        description="Multiplier applied to unary logits before the loss and "
+        "selector scoring. Part of the reference checkpoint contract "
+        "(dflash_config.output_multiplier); e.g. Muse-Glimmer-30B-DFlash2 "
+        "uses ~0.196.",
+    )
+    final_logit_softcapping: float | None = Field(
+        default=None,
+        gt=0,
+        description="Tanh softcap applied to unary logits after "
+        "output_multiplier (dflash_config.final_logit_softcapping). "
+        "None keeps logits uncapped.",
+    )
+    input_embedding_scale: float = Field(
+        default=1.0,
+        gt=0,
+        description="Scale applied to the noise embeddings fed to the draft "
+        "backbone (dflash_config.input_embedding_scale in reference "
+        "checkpoints). 1.0 leaves embeddings untouched.",
+    )

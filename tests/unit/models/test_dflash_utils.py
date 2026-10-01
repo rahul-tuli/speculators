@@ -57,3 +57,17 @@ class TestSelectAnchors:
         anchors, anchor_valid = select_anchors(loss_mask, num_anchors=8, block_size=4)
         selected = anchors[anchor_valid]
         assert torch.equal(selected, torch.sort(selected).values)
+
+    def test_anchor_requires_supervised_first_target(self):
+        # The block's first prediction target is anchor + 1; an anchor whose
+        # next token is unsupervised yields no gradient and must be ineligible.
+        torch.manual_seed(0)
+        loss_mask = torch.ones(1, 32)
+        loss_mask[:, 11] = 0  # position 10 is supervised but its target is not
+        anchors, anchor_valid = select_anchors(loss_mask, num_anchors=32, block_size=4)
+        selected = anchors[anchor_valid]
+
+        assert 10 not in selected
+        assert 11 not in selected  # itself unsupervised
+        # Everything else except the trailing block_size tail stays eligible.
+        assert selected.numel() == 32 - 4 - 2

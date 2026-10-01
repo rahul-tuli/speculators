@@ -7,6 +7,7 @@ import pytest
 from speculators import losses
 from speculators.losses import eager
 from speculators.models.dflash.core import DFlashDraftModel
+from speculators.models.dflash2.core import DFlash2DraftModel
 from speculators.models.dspark.core import DSparkDraftModel
 from speculators.models.eagle3.core import Eagle3DraftModel
 from speculators.models.peagle.core import PEagleDraftModel
@@ -225,6 +226,55 @@ def test_dflash_explicit_flags_override_new_defaults(monkeypatch):
     assert args.per_position_loss_weight == "fixed-exp-decay"
     assert args.loss_fn == "kl_div"
     assert args.block_size == 8
+
+
+def test_dflash2_defaults_to_reproduction_recipe(monkeypatch):
+    """DFlash2 defaults follow the published DFlash 2 reproduction recipe:
+    hard-target CE, loss_decay_gamma=7, strict top-k selector objective."""
+    args = _parse(monkeypatch, ["--speculator-type", "dflash2"])
+    assert args.loss_fn == "ce"
+    assert args.dflash_decay_gamma == 7.0
+    assert args.selector_candidate_mode == "strict-topk"
+    assert args.block_size == 8
+    assert args.num_layers == 5
+
+
+def test_dflash2_trainer_kwargs_follow_recipe(monkeypatch):
+    args = _parse(monkeypatch, ["--speculator-type", "dflash2"])
+    train_kw, val_kw = DFlash2DraftModel.get_trainer_kwargs(**vars(args))
+    assert "ce" in train_kw["loss_config"]
+    assert train_kw["loss_config"]["ce"][0] is losses.ce_loss
+    assert train_kw["gamma"] == 7.0
+    assert train_kw["selector_candidate_mode"] == "strict-topk"
+    assert val_kw["selector_candidate_mode"] == "strict-topk"
+
+
+def test_dflash2_explicit_overrides_still_work(monkeypatch):
+    args = _parse(
+        monkeypatch,
+        [
+            "--speculator-type",
+            "dflash2",
+            "--loss-fn",
+            "kl_div",
+            "--dflash-decay-gamma",
+            "4.0",
+            "--selector-candidate-mode",
+            "inject",
+        ],
+    )
+    assert args.loss_fn == "kl_div"
+    assert args.dflash_decay_gamma == 4.0
+    assert args.selector_candidate_mode == "inject"
+    train_kw, _ = DFlash2DraftModel.get_trainer_kwargs(**vars(args))
+    assert "kl_div" in train_kw["loss_config"]
+    assert train_kw["gamma"] == 4.0
+    assert train_kw["selector_candidate_mode"] == "inject"
+
+
+def test_dspark_gamma_default_unchanged(monkeypatch):
+    args = _parse(monkeypatch, ["--speculator-type", "dspark"])
+    assert args.dflash_decay_gamma == 4.0
 
 
 def test_eagle3_num_layers_and_loss_defaults_unchanged(monkeypatch):

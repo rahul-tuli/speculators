@@ -15,6 +15,7 @@ from speculators.models.dflash2.metrics import (
 from speculators.models.dflash2.metrics import (
     compute_selector_loss,
     selector_training_candidates,
+    strict_topk_selector_targets,
 )
 from speculators.models.dflash2.model_definitions import (
     CandidateSelector,
@@ -302,6 +303,68 @@ def test_config_round_trip_preserves_dflash2_contract(tmp_path):
     assert loaded.conv_group_size == config.conv_group_size
     assert loaded.selector_rank == config.selector_rank
     assert loaded.selector_top_k == config.selector_top_k
+    assert loaded.output_multiplier == 1.0
+    assert loaded.final_logit_softcapping is None
+    assert loaded.input_embedding_scale == 1.0
+
+
+def test_config_round_trip_preserves_logit_transform_contract(tmp_path):
+    """output_multiplier/softcap/embedding scale are part of the serving
+    contract and must survive save/load (reference: Muse-Glimmer-30B-DFlash2)."""
+    config = _tiny_config(
+        output_multiplier=0.19611613513818404,
+        final_logit_softcapping=20.0,
+        input_embedding_scale=2.0,
+        speculators_config=SpeculatorsConfig(
+            algorithm="dflash2",
+            proposal_methods=[GreedyTokenProposalConfig(speculative_tokens=3)],
+            default_proposal_method="greedy",
+            verifier=VerifierConfig(
+                name_or_path="Qwen/Qwen3-4B",
+                architectures=["Qwen3ForCausalLM"],
+            ),
+        ),
+    )
+
+    config.save_pretrained(tmp_path)
+    loaded = SpeculatorModelConfig.from_pretrained(tmp_path)
+
+    assert loaded.output_multiplier == pytest.approx(0.19611613513818404)
+    assert loaded.final_logit_softcapping == pytest.approx(20.0)
+    assert loaded.input_embedding_scale == pytest.approx(2.0)
+
+
+def test_transform_unary_logits_identity_by_default():
+    model = DFlash2DraftModel(_tiny_config())
+    logits = torch.randn(1, 8, 64)
+
+    transformed = model.transform_unary_logits(logits)
+
+    assert transformed is logits  # identity fast path
+
+
+def test_transform_unary_logits_matches_reference_formula():
+    model = DFlash2DraftModel(
+        _tiny_config(output_multiplier=0.2, final_logit_softcapping=20.0)
+    )
+    logits = torch.randn(1, 8, 64)
+
+    transformed = model.transform_unary_logits(logits)
+    expected = torch.tanh(logits.float() * 0.2 / 20.0) * 20.0
+
+    assert transformed.dtype == torch.float32
+    torch.testing.assert_close(transformed, expected)
+
+
+def test_scale_noise_embedding():
+    model = DFlash2DraftModel(_tiny_config())
+    embedding = torch.randn(1, 8, 16)
+    assert model._scale_noise_embedding(embedding) is embedding
+
+    scaled_model = DFlash2DraftModel(_tiny_config(input_embedding_scale=0.5))
+    torch.testing.assert_close(
+        scaled_model._scale_noise_embedding(embedding), embedding * 0.5
+    )
 
 
 def test_model_rejects_pruned_draft_vocabulary():
@@ -467,6 +530,11 @@ def test_selector_loss_reaches_every_selector_parameter():
         _targets,
         loss_mask,
     ) = _selector_objective_inputs()
+    # The successor codebook is zero-initialized (exact no-op start), which
+    # blocks gradient into the other two factors at step 0. Un-zero it to
+    # verify the full gradient path, as after the first optimizer step.
+    with torch.no_grad():
+        selector.successor_codebook.normal_(std=0.02)
     candidate_ids = unary_logits.topk(selector.top_k, dim=-1).indices
     training_candidate_ids, target_positions, _contains_target = (
         selector_training_candidates(candidate_ids, target_ids)
@@ -490,6 +558,150 @@ def test_selector_loss_reaches_every_selector_parameter():
         assert parameter.grad is not None, f"missing gradient for {name}"
         assert torch.isfinite(parameter.grad).all(), f"non-finite gradient for {name}"
         assert torch.count_nonzero(parameter.grad), f"zero gradient for {name}"
+
+
+def test_selector_zero_init_is_exact_unary_noop():
+    """A fresh selector must not perturb the unary DFlash proposal."""
+    torch.manual_seed(0)
+    selector = CandidateSelector(
+        vocab_size=11,
+        hidden_size=6,
+        rank=4,
+        top_k=3,
+    )
+    assert torch.count_nonzero(selector.successor_codebook) == 0
+    unary_logits = torch.randn(2, 5, 11)
+    hidden = torch.randn(2, 5, 6)
+    predecessor_ids = torch.randint(0, 11, (2, 5))
+
+    candidate_ids, scores = selector.select(unary_logits, hidden, predecessor_ids)
+
+    torch.testing.assert_close(scores, unary_logits.gather(-1, candidate_ids))
+
+    # At init only the successor factor receives gradient; the other two
+    # factors receive signal once the transition term is non-zero.
+    candidate_ids = unary_logits.topk(selector.top_k, dim=-1).indices
+    target_positions, _ = strict_topk_selector_targets(
+        candidate_ids, unary_logits.argmax(dim=-1)
+    )
+    candidate_logits = selector.score_candidates(
+        unary_logits, hidden, predecessor_ids, candidate_ids
+    )
+    compute_selector_loss(
+        candidate_logits,
+        target_positions,
+        torch.ones(2, 5),
+        5,
+        gamma=7.0,
+        per_position_loss_weight="fixed-exp-decay",
+        dpace_alpha=0.5,
+    ).backward()
+    assert torch.count_nonzero(selector.successor_codebook.grad) > 0
+    assert torch.count_nonzero(selector.predecessor_codebook.grad) == 0
+    assert torch.count_nonzero(selector.hidden_projection.weight.grad) == 0
+
+
+def test_strict_topk_selector_targets_never_inject():
+    candidate_ids = torch.tensor([[[5, 4, 3], [5, 4, 3]]])
+    target_ids = torch.tensor([[4, 0]])
+
+    target_positions, contains_target = strict_topk_selector_targets(
+        candidate_ids, target_ids
+    )
+
+    # Position 0: target 4 is on the list at index 1. Position 1: target 0 is
+    # not covered; no injection, the position is gated out of the loss instead.
+    assert target_positions.tolist() == [[1, 0]]
+    assert contains_target.tolist() == [[True, False]]
+    assert candidate_ids.tolist() == [[[5, 4, 3], [5, 4, 3]]]
+
+
+def test_strict_topk_gates_selector_loss_to_covered_positions():
+    """Selector gradient must be zero exactly where the unary top-k missed."""
+    (
+        selector,
+        unary_logits,
+        hidden_states,
+        predecessor_ids,
+        target_ids,
+        targets,
+        loss_mask,
+    ) = _selector_objective_inputs()
+    with torch.no_grad():
+        selector.successor_codebook.normal_(std=0.02)
+    loss_config = resolve_loss_config("ce", "eager")
+    tv_loss_fn = resolve_loss_config("tv", "eager")["tv"][0]
+
+    candidate_ids = unary_logits.topk(selector.top_k, dim=-1).indices
+    target_positions, contains_target = strict_topk_selector_targets(
+        candidate_ids, target_ids
+    )
+    assert not contains_target.all()  # fixture must contain a coverage miss
+    candidate_logits = selector.score_candidates(
+        unary_logits, hidden_states, predecessor_ids, candidate_ids
+    )
+    selector_loss_mask = loss_mask * contains_target.to(loss_mask.dtype)
+
+    gated_loss, _ = compute_dflash2_metrics(
+        unary_logits=unary_logits,
+        targets=targets,
+        training_candidate_ids=candidate_ids,
+        candidate_logits=candidate_logits,
+        target_positions=target_positions,
+        contains_target=contains_target,
+        loss_mask=loss_mask,
+        block_size=4,
+        top_k=selector.top_k,
+        loss_config=loss_config,
+        tv_loss_fn=tv_loss_fn,
+        gamma=7.0,
+        selector_loss_mask=selector_loss_mask,
+    )
+    ungated_loss, _ = compute_dflash2_metrics(
+        unary_logits=unary_logits,
+        targets=targets,
+        training_candidate_ids=candidate_ids,
+        candidate_logits=candidate_logits,
+        target_positions=target_positions,
+        contains_target=contains_target,
+        loss_mask=loss_mask,
+        block_size=4,
+        top_k=selector.top_k,
+        loss_config=loss_config,
+        tv_loss_fn=tv_loss_fn,
+        gamma=7.0,
+    )
+
+    # Gating removes the (uncovered) hardest example, so the gated selector
+    # term differs from the ungated one; the unary term is identical either way.
+    assert not torch.isclose(gated_loss, ungated_loss)
+
+    # The gated loss must equal hand-computed CE over covered positions only.
+    ce = torch.nn.functional.cross_entropy(
+        candidate_logits.float().reshape(-1, candidate_logits.shape[-1]),
+        target_positions.reshape(-1),
+        reduction="none",
+    ).view_as(target_positions)
+    decay = torch.exp(
+        -((torch.arange(4, dtype=torch.float32) - 1).clamp(min=0)) / 7.0
+    ) * (torch.arange(4) != 0)
+    weighted = ce * selector_loss_mask * decay
+    expected_selector = weighted.sum() / ((selector_loss_mask * decay).sum() + 1e-5)
+    unary_only, _ = compute_unary_metrics(
+        unary_logits,
+        targets,
+        None,
+        loss_mask,
+        4,
+        loss_config=loss_config,
+        tv_loss_fn=tv_loss_fn,
+        gamma=7.0,
+        confidence_head_alpha=0.0,
+        per_position_loss_weight="fixed-exp-decay",
+        dpace_alpha=0.5,
+        sample_from_anchor=False,
+    )
+    torch.testing.assert_close(gated_loss, unary_only + expected_selector)
 
 
 def test_trainer_kwargs_include_selector_loss_alpha():
@@ -568,4 +780,9 @@ def test_tiny_gpu_forward_backward_reaches_all_new_parameters():
     for name, parameter in new_parameters.items():
         assert parameter.grad is not None, f"missing gradient for {name}"
         assert torch.isfinite(parameter.grad).all(), f"non-finite gradient for {name}"
+        # Selector factors are only guaranteed gradient where the strict unary
+        # top-k covers the target (and the zero-init successor gates the other
+        # two factors at step 0), so only the convolutions must be nonzero.
+        if "candidate_selector" in name:
+            continue
         assert torch.count_nonzero(parameter.grad), f"zero gradient for {name}"
