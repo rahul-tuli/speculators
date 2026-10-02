@@ -696,8 +696,8 @@ def load_raw_dataset(
     """Load a raw dataset from one of several source types.
 
     Resolution order:
-        1. Local ``.json``/``.jsonl`` file.
-        2. Local directory: recursively load all ``*.json``/``*.jsonl`` files
+        1. Local ``.json``, ``.jsonl``, or ``.jsonl.gz`` file.
+        2. Local directory: recursively load all matching JSON/JSONL files
            as a single dataset.
         3. Named preset from ``DATASET_CONFIGS``.
         4. ``hf:<id>[:<subset>:<split>]`` for an arbitrary HuggingFace dataset.
@@ -711,21 +711,26 @@ def load_raw_dataset(
 
     Raises:
         ValueError: If the source cannot be resolved or a local directory
-            contains no ``.json``/``.jsonl`` files.
+            contains no supported JSON/JSONL files.
     """
     # 1. Local file
-    if train_data_path.endswith((".jsonl", ".json")):
+    if train_data_path.endswith((".jsonl.gz", ".jsonl", ".json")):
         return load_dataset("json", data_files=train_data_path, split="train"), None
 
     # 2. Local directory
     path = Path(train_data_path)
     if path.is_dir():
         data_files = sorted(
-            str(p) for p in (*path.rglob("*.json"), *path.rglob("*.jsonl"))
+            str(p)
+            for p in (
+                *path.rglob("*.json"),
+                *path.rglob("*.jsonl"),
+                *path.rglob("*.jsonl.gz"),
+            )
         )
         if not data_files:
             raise ValueError(
-                f"No .json/.jsonl files found in directory: {train_data_path}"
+                f"No .json/.jsonl/.jsonl.gz files found in directory: {train_data_path}"
             )
         return load_dataset("json", data_files=data_files, split="train"), None
 
@@ -744,8 +749,9 @@ def load_raw_dataset(
         return _load_hf_dataset(train_data_path)
 
     raise ValueError(
-        f"Unsupported dataset: {train_data_path}. Supported: local .json/.jsonl "
-        f"file, local directory of .json/.jsonl files, hf:<id>[:<subset>:<split>], "
+        f"Unsupported dataset: {train_data_path}. Supported: local JSON/JSONL files "
+        "(.json, .jsonl, .jsonl.gz), local directories containing them, "
+        f"hf:<id>[:<subset>:<split>], "
         f"or a preset {list(DATASET_CONFIGS.keys())}."
     )
 

@@ -12,11 +12,11 @@
 # Reference points this recipe is aligned with:
 #   - incoai/Qwen3.8-27B-DFlash2 checkpoint contract: 5 layers, block_size 8,
 #     conv (kernel 2, group 16), selector (rank 256, top-k 16), aux layers
-#     5/19/33/47/61, mask token 248070.
+#     5/19/33/47/61, mask token 248070. vLLM appends the final layer for extraction.
 #   - SpecForge recipe "qwen3.8-27b-dflash2": constant lr 5e-4,
 #     loss_decay_gamma 7, hard-target CE with the strict top-k selector
 #     objective, ~512 samples per optimizer step for full-convergence runs.
-#
+# This recipe uses Speculators' default learning rate (1e-3); --lr is omitted.
 # Warm start: not required. DFlash2 with identity convolutions and the
 # zero-initialized selector is exactly a DFlash model at step 0, so cold
 # start is well-defined. If you want to warm-start the backbone from a
@@ -35,13 +35,19 @@ set -euo pipefail
 MODEL="Qwen/Qwen3.8-27B"
 # On-policy regenerated dataset: local path, HF id, or preset. Must be
 # pretokenized (input_ids + loss_mask) or rendered via --render-endpoint.
-DATASET="/path/to/qwen3.8-27b-regen-train.jsonl"
-OUTPUT_DIR="./output/dflash2_qwen3_8_27b_regen"
+DATASET="${DATASET:-/data/fast/OpenPerfectBlend-Qwen38-27B-regenerated/data/train.jsonl.gz}"
+OUTPUT_DIR="${OUTPUT_DIR:-/data/fast/dflash2_qwen3_8_27b_regen}"
+MAX_SAMPLES="${MAX_SAMPLES:--1}"
+VLLM_PYTHON="${VLLM_PYTHON:-/workspace/vllm/.venv/bin/python}"
+TRAIN_PYTHON="${TRAIN_PYTHON:-python}"
+RUN_NAME="${RUN_NAME:-dflash2-qwen3-8-27b-regen-{utc_time}}"
+# Reuse the same output/checkpoint/Trackio directories when restarting this run.
+export TRACKIO_DIR="${TRACKIO_DIR:-$OUTPUT_DIR/trackio}"
 VLLM_PORT=8000
-SEQ_LENGTH=8192
-EPOCHS=1                 # one epoch over a ~1M-sample regen corpus is the reference recipe
-LR=5e-4                  # constant, per the reproduction recipe
-MAX_SAMPLES=-1           # set to a small number (e.g. 5000) for a pipeline smoke test
+SEQ_LENGTH=16384          # Covers the corpus p95 (16,253 tokens); longer rows are truncated.
+VLLM_MAX_MODEL_LEN=$((SEQ_LENGTH + 1)) # Leave room for the one-token hidden-state request.
+EPOCHS=1                 # one epoch over the 1.88M-record regenerated corpus
+CHECKPOINT_FREQ="${CHECKPOINT_FREQ:-0.1}" # checkpoint every 10% of an epoch
 
 # DFlash2 architecture (matches the incoai/Qwen3.8-27B-DFlash2 contract)
 SPECULATOR_TYPE="dflash2"
@@ -58,14 +64,13 @@ SELECTOR_TOP_K=16
 LOSS_FN="ce"
 GAMMA=7.0
 SELECTOR_CANDIDATE_MODE="strict-topk"
-MAX_ANCHORS=3072
+MAX_ANCHORS="${MAX_ANCHORS:-512}" # Keep the 16K DFlash attention mask within train-GPU memory.
 
 # GPU assignments (online training needs separate GPUs for vLLM and training).
-# The reference layout for this target on one 8xH200 node is 5 capture
-# servers + 3 trainer ranks; size to your hardware.
-VLLM_GPUS="0,1,2,3"
-TRAIN_GPUS="4,5,6,7"
-NUM_TRAIN_GPUS=4
+# Use two GPUs for vLLM and the remaining six for training on an 8-GPU node.
+VLLM_GPUS="0,1"
+TRAIN_GPUS="2,3,4,5,6,7"
+NUM_TRAIN_GPUS=6
 # =======================================
 
 # Step 1: Prepare data
@@ -86,9 +91,10 @@ speculators prepare-data "${PREPARE_ARGS[@]}"
 
 # Step 2: Launch vLLM server in the background
 echo "=== Step 2: Launching vLLM server ==="
-CUDA_VISIBLE_DEVICES="$VLLM_GPUS" python scripts/launch_vllm.py "$MODEL" \
+CUDA_VISIBLE_DEVICES="$VLLM_GPUS" "$VLLM_PYTHON" scripts/launch_vllm.py "$MODEL" \
+    --provenance-dir "$OUTPUT_DIR" \
     --target-layer-ids $TARGET_LAYER_IDS \
-    -- --data-parallel-size 4 --port "$VLLM_PORT" &
+    -- --data-parallel-size 2 --max-model-len "$VLLM_MAX_MODEL_LEN" --port "$VLLM_PORT" &
 VLLM_PID=$!
 
 # Ensure vLLM is cleaned up on exit
@@ -107,7 +113,7 @@ echo "vLLM server ready."
 
 # Step 3: Train against the live vLLM server
 echo "=== Step 3: Training ==="
-CUDA_VISIBLE_DEVICES="$TRAIN_GPUS" torchrun \
+CUDA_VISIBLE_DEVICES="$TRAIN_GPUS" "$TRAIN_PYTHON" -m torch.distributed.run \
     --standalone --nproc_per_node "$NUM_TRAIN_GPUS" \
     -m speculators.train \
     --verifier-name-or-path "$MODEL" \
@@ -115,7 +121,7 @@ CUDA_VISIBLE_DEVICES="$TRAIN_GPUS" torchrun \
     --vllm-endpoint "http://localhost:${VLLM_PORT}/v1" \
     --save-path "$OUTPUT_DIR/checkpoints" \
     --epochs "$EPOCHS" \
-    --lr "$LR" \
+    --checkpoint-freq "$CHECKPOINT_FREQ" \
     --scheduler-type none \
     --total-seq-len "$SEQ_LENGTH" \
     --speculator-type "$SPECULATOR_TYPE" \
@@ -131,8 +137,12 @@ CUDA_VISIBLE_DEVICES="$TRAIN_GPUS" torchrun \
     --dflash-decay-gamma "$GAMMA" \
     --selector-candidate-mode "$SELECTOR_CANDIDATE_MODE" \
     --max-anchors "$MAX_ANCHORS" \
+    --gradient-checkpointing \
     --on-missing generate \
-    --on-generate delete
+    --on-generate delete \
+    --logger trackio \
+    --log-dir "$OUTPUT_DIR/logs" \
+    --run-name "$RUN_NAME"
 
 echo "Done. Checkpoints saved to $OUTPUT_DIR/checkpoints/"
 

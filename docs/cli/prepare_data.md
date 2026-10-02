@@ -42,7 +42,7 @@ speculators prepare-data \
 
 ### Data Arguments
 
-- **`--data`** (str, required, repeatable) On-policy target-model data. Use a local JSON/JSONL file or directory, or an `hf:` dataset spec. Use multiple times to combine datasets.
+- **`--data`** (str, required, repeatable) On-policy target-model data. Use a local `.json`, `.jsonl`, or `.jsonl.gz` file or directory, or an `hf:` dataset spec. Use multiple times to combine datasets.
 
   Example: `--data ./target_responses.jsonl --data hf:my-org/more-target-responses`
 
