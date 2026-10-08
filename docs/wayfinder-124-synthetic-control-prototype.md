@@ -1,38 +1,42 @@
-# PROTOTYPE — DSpark synthetic acceptance and benchmark recipe
+# DSpark synthetic acceptance and benchmark recipe
 
-Status: draft for human review. Static configuration and CLI behavior have been checked; the live H100 smoke is pending.
+Status: prototype complete. The user selected eight draft tokens and the proposed random token-ID workload. The two-arm H100 smoke completed on 2026-10-08.
 
-## Question this prototype answers
+## Question answered
 
 Can the map's eight-position synthetic acceptance vector be passed to the DSpark server unchanged, and what fixed `vllm bench serve` workload should be used for the depth sweep?
 
-## Findings from the checked-out code and model card
+## Findings
 
-- The active `/workspace/vllm` checkout is commit `295ac4e52e8a35772b2a63c028f6510e221a65cf`; package metadata reports vLLM `0.29.0`.
-- `SpeculativeConfig` accepts `rejection_sample_method="synthetic"` with exactly one of `synthetic_acceptance_rates` or `synthetic_acceptance_length`. A rates vector must contain `num_speculative_tokens` entries, each in `[0,1]`, and be non-increasing. Its entries are *unconditional* per-position rates: entry `i` means the probability that the first `i+1` proposed tokens are all accepted. The rejection sampler converts these rates to conditional rates before sampling.
-- The RedHatAI model card's nine workload rows average, to three decimal places, to `[0.815, 0.646, 0.511, 0.404, 0.322, 0.259, 0.208, 0.170]`. The implied expected acceptance length is `1 + sum(rates) = 4.335`.
-- `vllm bench serve` collects speculative counters before and after measured requests and saves acceptance length, accepted-token fraction, and per-position rates in its result JSON. Warmup requests run before the measurement interval.
-- The model card's deployment example says `num_speculative_tokens: 7`, while its checkpoint config says `block_size: 8` and `speculative_tokens: 8`, and the acceptance table has eight positions. This prototype follows the map's eight-token control; the serving smoke should settle this documentation mismatch.
+- The `/workspace/vllm` checkout is at `295ac4e52e8a35772b2a63c028f6510e221a65cf`. The installed server imported vLLM from `/usr/local/lib/python3.12/dist-packages/vllm`; its build string was `0.29.1.dev0+g98dff2a81.d20260917`, while Python package metadata and the launch provenance report `0.29.0`. The installed wheel's direct URL points to `/vllm-workspace/dist/vllm-0.29.0-cp38-abi3-linux_x86_64.whl`. The installed `config/speculative.py`, `v1/sample/rejection_sampler.py`, and `benchmarks/serve.py` were byte-identical to those in the checked-out source. Keep both the checkout SHA and runtime build string when recording this environment.
+- `SpeculativeConfig` accepts `rejection_sample_method="synthetic"` with exactly one of `synthetic_acceptance_rates` or `synthetic_acceptance_length`. A rates vector must contain exactly `num_speculative_tokens` entries, each in `[0,1]` and non-increasing. Entries are unconditional per-position probabilities: entry `i` is the chance that the first `i+1` proposed tokens are all accepted. The rejection sampler converts these values to conditional rates before sampling.
+- The nine workload rows in the RedHatAI model card average, to three decimal places, to `[0.815, 0.646, 0.511, 0.404, 0.322, 0.259, 0.208, 0.170]`. The implied expected acceptance length is `1 + sum(rates) = 4.335`.
+- The model card's deployment example says `num_speculative_tokens: 7`, while its checkpoint config says `block_size: 8` and proposal `speculative_tokens: 8`, and its acceptance table has eight positions. The user chose eight tokens, matching the checkpoint and table.
+- `vllm bench serve` reads speculative counters around the measured request interval and saves the acceptance length, accepted-token fraction, and per-position rates in its JSON result. Warmup requests are outside that interval.
 
 Sources: `/workspace/vllm/vllm/config/speculative.py`, `/workspace/vllm/vllm/v1/sample/rejection_sampler.py`, `/workspace/vllm/vllm/benchmarks/serve.py`, and the [RedHatAI model card](https://huggingface.co/RedHatAI/Qwen3.8-27B-speculator.dspark).
 
-## Proposed fixed measurement workload
+## Fixed workload for the depth sweep
 
-Use vLLM's deterministic `random` dataset to keep token counts and prompts identical across arms. It sends token-ID prompts through the OpenAI completions API; this is a compute-cost workload, not a quality or chat-template evaluation.
+The user selected this workload. It uses vLLM's seeded `random` dataset to hold token-ID prompts and lengths constant across arms. It is a compute-cost workload, not a quality or chat-template evaluation.
 
-| Setting              | Proposed value                                                                                                    |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Dataset and endpoint | `random`, `/v1/completions`                                                                                       |
-| Input / output       | 512 / 128 tokens, `--random-range-ratio 0.0`, `--ignore-eos`                                                      |
-| Requests and seed    | 64 requests, seed 42                                                                                              |
-| Load                 | `--request-rate inf`, `--max-concurrency 16`                                                                      |
-| Warmup               | 10 requests before each timed repetition                                                                          |
-| Repeats              | At least 3 timed invocations per arm                                                                              |
-| Report               | Output-token throughput; TTFT, TPOT, and ITL at P50/P90/P99; speculative acceptance counters for speculative arms |
+| Setting                  | Value                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| Dataset and endpoint     | `random`, `/v1/completions`                                                                  |
+| Input and output         | 512 / 128 tokens, `--random-range-ratio 0.0`, `--ignore-eos`                                 |
+| Requests and client seed | 64 requests, seed 42                                                                         |
+| Server seed              | 1234                                                                                         |
+| Load                     | `--request-rate inf`, `--max-concurrency 16`                                                 |
+| Warmup                   | 10 requests before each timed invocation                                                     |
+| Repeats                  | At least 3 timed invocations per arm                                                         |
+| Report                   | Output-token throughput; TTFT, TPOT, and ITL at P50/P90/P99; speculative acceptance counters |
+| Client thread limits     | `RAYON_NUM_THREADS=2 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1`                               |
 
-This gives each run 8,192 requested output tokens while keeping the request set small enough for the depth ladder. `--save-result` should write a separate JSON file for every arm and repetition. Reuse the exact arguments and seed for target-only, the original DSpark, each dummy depth, and the quantized arms.
+Each run requests 8,192 output tokens. The first client attempt without thread limits failed while Rayon created its thread pool (`EAGAIN`, resource temporarily unavailable). The same benchmark succeeded with the limits above. Keep the thread limits in the benchmark command. The smoke's first invocation verifies the recipe; its single timing is not a performance conclusion.
 
-## Proposed server commands
+Keep each server process alive across its timed repetitions, and retain the 10 client warmup requests before each measured invocation. Use identical benchmark arguments and seed for target-only, the original DSpark, each dummy depth, and quantized arms. Give each arm and repetition a unique result filename.
+
+## Pinned models and server commands
 
 ```bash
 TARGET=Qwen/Qwen3.8-27B
@@ -42,7 +46,7 @@ DRAFTER_REV=87ca2fdc67f316f6c1f9ebc7ef7bbb0ad299a4ce
 OUT=/data/fast/drafter-quant/results/dspark-qwen3.8-27b-acceptance/phase2-control-prototype-20261008
 ```
 
-Target-only (current workspace's `launch_vllm.py` supports omitting `--spec-model`):
+Target-only:
 
 ```bash
 /usr/bin/python scripts/launch_vllm.py eval "$TARGET" \
@@ -51,7 +55,7 @@ Target-only (current workspace's `launch_vllm.py` supports omitting `--spec-mode
      --max-model-len 4096 --dtype bfloat16 --port 8000 --seed 1234
 ```
 
-Original DSpark with the synthetic control:
+Original DSpark with the selected synthetic profile:
 
 ```bash
 SPEC_CONFIG="{\"rejection_sample_method\":\"synthetic\",\"synthetic_acceptance_rates\":[0.815,0.646,0.511,0.404,0.322,0.259,0.208,0.170],\"revision\":\"$DRAFTER_REV\"}"
@@ -63,13 +67,14 @@ SPEC_CONFIG="{\"rejection_sample_method\":\"synthetic\",\"synthetic_acceptance_r
      --speculative-config "$SPEC_CONFIG"
 ```
 
-The target-only command relies on a pending change in the main worktree that makes `--spec-model` optional for `launch_vllm.py eval`; I did not edit that file. Both commands include `--provenance-dir` as required by the repo guide. The model references are pinned to immutable Hugging Face commits.
+Both server commands passed `--provenance-dir`. The launch artifacts are in the run directory above. The model references are pinned to immutable Hugging Face commits. The `checkpoint_sha256.txt` files record that the model IDs were remote references; the pinned revisions supply the immutable model identity.
 
-## Proposed client command
+## Benchmark command
 
-Change `--label`, `--result-dir`, and `--result-filename` per arm/repetition; keep the workload arguments unchanged.
+Use the same arguments for every arm and repetition; change only the result directory, label, and filename.
 
 ```bash
+RAYON_NUM_THREADS=2 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
 vllm bench serve \
   --host 127.0.0.1 --port 8000 \
   --backend openai --endpoint /v1/completions \
@@ -84,15 +89,30 @@ vllm bench serve \
   --label target-only --result-filename target-only-r1.json
 ```
 
-## Smoke-test status
+## H100 smoke result
 
-Not run. At inspection time, another vLLM server was already launching the 10-layer depth variant on both H100s and then held about 35 GiB on each GPU. I stopped my target-only launch while it was still hashing provenance, before it loaded a model or used the GPUs. The existing server was left untouched. The scratch run directory is `/data/fast/drafter-quant/results/dspark-qwen3.8-27b-acceptance/phase2-control-prototype-20261008/`.
+Hardware: 2×H100 80 GB, tensor parallelism 2. The target-only and DSpark servers used target revision `1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0`; the DSpark server used drafter revision `87ca2fdc67f316f6c1f9ebc7ef7bbb0ad299a4ce`. Each arm completed all 64 requests with 0 failures, 32,768 input tokens, and 8,192 output tokens.
 
-## Human review needed
+| Arm              | Output tokens/s | TTFT P50 / P90 / P99 (ms) | TPOT P50 / P90 / P99 (ms) | ITL P50 / P90 / P99 (ms) |
+| ---------------- | --------------: | ------------------------- | ------------------------- | ------------------------ |
+| Target-only      |          947.27 | 383.49 / 420.21 / 432.19  | 14.03 / 15.71 / 16.38     | 13.65 / 14.09 / 15.65    |
+| DSpark synthetic |          974.79 | 246.38 / 454.85 / 456.65  | 10.71 / 27.90 / 31.05     | 23.35 / 88.18 / 107.34   |
 
-Please react to these choices before this ticket is resolved:
+The DSpark result reported acceptance length `4.33455` and these per-position acceptance rates:
 
-1. Keep the proposed 512-in / 128-out random token-ID workload and `/v1/completions` endpoint for the depth-cost experiment, or use chat-formatted prompts instead?
-2. Keep eight speculative tokens to match the checkpoint config, eight-position table, and fixed vector, despite the model card's deployment example showing seven?
+```text
+[0.81889, 0.64823, 0.50992, 0.39614, 0.31785, 0.26044, 0.20981, 0.17328]
+```
 
-The live two-arm smoke (target-only and original DSpark) still needs to run when the H100 pair is free. Its acceptance counters must show all eight positions and be broadly consistent with the configured profile; a small smoke is a configuration check, not evidence for a throughput conclusion.
+All eight positions were present, and the measured rates and acceptance length were close to the configured `[0.815, 0.646, 0.511, 0.404, 0.322, 0.259, 0.208, 0.170]` profile and expected length `4.335`. This confirms the synthetic control reached the sampler without truncation. These single-run throughput and latency values are smoke outputs only; ticket #125 must use repeated measurements before making a performance claim.
+
+vLLM logged that DSpark could not identify a draft KV-cache group for this multimodal target and disabled prefix-cache reuse. The fixed random completions workload does not reuse prompt prefixes, so this did not prevent the smoke.
+
+The committed results and provenance are available alongside this report:
+
+- [Target-only benchmark result](wayfinder-124-artifacts/target-only/target-only-smoke.json), [launch command](wayfinder-124-artifacts/target-only/vllm_command.txt), [vLLM patch record](wayfinder-124-artifacts/target-only/vllm.patch), and [checkpoint reference](wayfinder-124-artifacts/target-only/checkpoint_sha256.txt).
+- [DSpark benchmark result](wayfinder-124-artifacts/dspark-synthetic/dspark-synthetic-smoke.json), [launch command](wayfinder-124-artifacts/dspark-synthetic/vllm_command.txt), [vLLM patch record](wayfinder-124-artifacts/dspark-synthetic/vllm.patch), [target checkpoint reference](wayfinder-124-artifacts/dspark-synthetic/checkpoint_sha256.txt), and [drafter checkpoint reference](wayfinder-124-artifacts/dspark-synthetic/drafter_checkpoint_sha256.txt).
+
+The same files remain in the local run directory `/data/fast/drafter-quant/results/dspark-qwen3.8-27b-acceptance/phase2-control-prototype-20261008/`.
+
+The initial unbounded benchmark client failed before sending requests; retrying with the listed thread limits succeeded. No depth or quantization arms were run in this prototype.

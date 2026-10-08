@@ -1,0 +1,1 @@
+# model: RedHatAI/Qwen3.8-27B-speculator.dspark (not a local path)
