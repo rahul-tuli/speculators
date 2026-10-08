@@ -1,0 +1,5 @@
+# Timestamp: 2026-10-08T15:28:54.357208+00:00
+# Python: /usr/bin/python3.12
+# Git SHA: 295ac4e52e8a35772b2a63c028f6510e221a65cf
+# vllm: 0.29.0
+/usr/bin/python3.12 -m vllm.entrypoints.cli.main serve Qwen/Qwen3.8-27B --revision 1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0 --tensor-parallel-size 2 --max-model-len 4096 --max-num-seqs 16 --dtype bfloat16 --port 8000 --seed 1234

@@ -1,0 +1,1 @@
+/usr/bin/python3.12 scripts/launch_vllm.py eval Qwen/Qwen3.8-27B --provenance-dir /workspace/speculators/docs/wayfinder-125-dspark-bf16-depth-ladder-20261008/artifacts/num-prompts-1000-max-num-seqs-16/target-only -- --revision 1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0 --tensor-parallel-size 2 --max-model-len 4096 --max-num-seqs 16 --dtype bfloat16 --port 8000 --seed 1234

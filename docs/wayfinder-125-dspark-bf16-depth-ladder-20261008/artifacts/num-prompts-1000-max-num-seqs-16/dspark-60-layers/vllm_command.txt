@@ -1,0 +1,5 @@
+# Timestamp: 2026-10-08T18:25:41.639963+00:00
+# Python: /usr/bin/python3.12
+# Git SHA: 295ac4e52e8a35772b2a63c028f6510e221a65cf
+# vllm: 0.29.0
+/usr/bin/python3.12 -m vllm.entrypoints.cli.main serve Qwen/Qwen3.8-27B --spec-model /tmp/wayfinder-issue-125/checkpoints/Qwen3.8-27B-speculator.dspark-60-layers --spec-tokens 8 --spec-method dspark --revision 1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0 --tensor-parallel-size 2 --max-model-len 4096 --max-num-seqs 16 --dtype bfloat16 --port 8000 --seed 1234 --speculative-config '{"rejection_sample_method":"synthetic","synthetic_acceptance_rates":[0.815,0.646,0.511,0.404,0.322,0.259,0.208,0.17],"revision":"7f33c272e5da240978e0d55767abab8193d74b95"}'
